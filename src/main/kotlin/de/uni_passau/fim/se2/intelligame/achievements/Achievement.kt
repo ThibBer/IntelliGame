@@ -21,15 +21,14 @@ import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.PlatformDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.ui.content.ContentFactory
-import de.uni_passau.fim.se2.intelligame.MyBundle
 import de.uni_passau.fim.se2.intelligame.components.AchievementToolWindow
+import de.uni_passau.fim.se2.intelligame.services.LeaderboardService
 import de.uni_passau.fim.se2.intelligame.util.CSVReportGenerator
 import de.uni_passau.fim.se2.intelligame.util.Logger
 import java.util.concurrent.TimeUnit
-import javax.swing.SwingUtilities
 
 abstract class Achievement {
 
@@ -39,17 +38,7 @@ abstract class Achievement {
 
     companion object {
         fun refreshWindow() {
-            if (MyBundle.message("group") != "control") {
-                val project = DataManager.getInstance().dataContextFromFocusAsync
-                    .blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)
-                val toolWindow = ToolWindowManager.getInstance(project!!).getToolWindow("Achievements")!!
-                SwingUtilities.invokeLater {
-                    toolWindow.contentManager.removeAllContents(true)
-                    val content = ContentFactory.getInstance()
-                        .createContent(AchievementToolWindow.createPanel(), null, false)
-                    toolWindow.contentManager.addContent(content)
-                }
-            }
+            AchievementToolWindow.refresh()
         }
     }
 
@@ -98,24 +87,20 @@ abstract class Achievement {
      * Shows the balloon with the given message.
      */
     fun showAchievementNotification(message: String, project: Project?) {
-        if (MyBundle.message("group") != "control") {
-            NotificationGroupManager.getInstance().getNotificationGroup("Custom Notification Group")
-                .createNotification(
-                    message,
-                    NotificationType.INFORMATION
-                )
-                .addAction(
-                    NotificationAction.createSimple("Show more information"
-                    ) {
-                        val myProject = DataManager.getInstance().dataContextFromFocusAsync
-                            .blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)
-                        val toolWindow = ToolWindowManager.getInstance(myProject!!).getToolWindow("Achievements")!!
-                        refreshWindow()
-                        toolWindow.show()
-                    }
-                )
-                .notify(null)
-        }
+        NotificationGroupManager.getInstance().getNotificationGroup("Gamification")
+            .createNotification(
+                message,
+                NotificationType.INFORMATION
+            )
+            .addAction(
+                NotificationAction.createSimple("Show more information") {
+                    val myProject = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)
+                    val toolWindow = ToolWindowManager.getInstance(myProject!!).getToolWindow("Gamification")!!
+                    refreshWindow()
+                    toolWindow.show()
+                }
+            )
+            .notify(null)
 
         Logger.logStatus(message, Logger.Kind.Notification, project)
     }
@@ -131,19 +116,30 @@ abstract class Achievement {
     private fun getProgressGroup(): Pair<Int, String> {
         val progressInPercent = (progress().toFloat() / nextStep())
         val reachedPercentage = "%.2f".format((progressInPercent * 100))
-        if (progressInPercent >= 0.25) {
-            if (progressInPercent >= 0.5) {
-                if (progressInPercent >= 0.75) {
-                    return Pair(3, reachedPercentage)
-                }
-                return Pair(2, reachedPercentage)
-            }
+        if (progressInPercent < 0.25) {
+            return Pair(0, reachedPercentage)
+        }
+
+        if (progressInPercent < 0.5) {
             return Pair(1, reachedPercentage)
         }
-        return Pair(0, reachedPercentage)
+
+        if (progressInPercent < 0.75) {
+            return Pair(2, reachedPercentage)
+        }
+
+        return Pair(3, reachedPercentage)
     }
 
     protected fun handleProgress(progress: Int, project: Project?) {
+        if(project != null){
+            val leaderboardService = project.service<LeaderboardService>()
+
+            val pointsToAdd = progress - progress()
+            println("${getName()} - pointsToAdd $pointsToAdd")
+            leaderboardService.addPoints(pointsToAdd, getName())
+        }
+
         if (progress >= nextStep()) {
             updateProgress(progress)
             showAchievementNotification("Congratulations! You unlocked level " + getLevel() + " of the '"

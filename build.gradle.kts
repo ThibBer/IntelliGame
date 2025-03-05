@@ -8,7 +8,7 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.8.21"
+    id("org.jetbrains.kotlin.jvm") version "2.1.10"
     // Gradle IntelliJ Plugin
     id("org.jetbrains.intellij") version "1.13.3"
     // Gradle Changelog Plugin
@@ -31,6 +31,8 @@ dependencies {
     implementation("com.github.tsantalis:refactoring-miner:2.2.0")
     implementation("org.apache.commons:commons-csv:1.10.0")
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
+    implementation("com.google.code.gson:gson:2.12.1")
 }
 
 configurations.all {
