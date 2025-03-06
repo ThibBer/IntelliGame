@@ -24,7 +24,7 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
-import de.uni_passau.fim.se2.intelligame.components.AchievementToolWindow
+import de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow
 import de.uni_passau.fim.se2.intelligame.services.LeaderboardService
 import de.uni_passau.fim.se2.intelligame.util.CSVReportGenerator
 import de.uni_passau.fim.se2.intelligame.util.Logger
@@ -38,7 +38,7 @@ abstract class Achievement {
 
     companion object {
         fun refreshWindow() {
-            AchievementToolWindow.refresh()
+            GamificationToolWindow.refresh()
         }
     }
 

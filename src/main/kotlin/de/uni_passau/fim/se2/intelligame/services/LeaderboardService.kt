@@ -23,10 +23,11 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import de.uni_passau.fim.se2.intelligame.MyBundle
-import de.uni_passau.fim.se2.intelligame.components.AchievementToolWindow
+import de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow
 import de.uni_passau.fim.se2.intelligame.leaderboard.Leaderboard
 import de.uni_passau.fim.se2.intelligame.leaderboard.command.*
 import de.uni_passau.fim.se2.intelligame.util.Logger
+import de.uni_passau.fim.se2.intelligame.util.WebSocketState
 import okhttp3.*
 import java.util.*
 
@@ -34,9 +35,9 @@ class LeaderboardService(val project: Project): Disposable {
     private val httpClient = OkHttpClient()
     private val gson = Gson()
     private lateinit var webSocketClient: WebSocket
-    private var isWebSocketConnected = false
-    private var webSocketState = "Disconnected"
-    private var userUUID = UUID.randomUUID().toString()
+    private var webSocketState = WebSocketState.DISCONNECTED
+    private var userUUID = ""
+    private var username = ""
 
     private var url = MyBundle.getMessage("websocketURL")
     private val request = Request.Builder().url(url).build()
@@ -44,8 +45,7 @@ class LeaderboardService(val project: Project): Disposable {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             super.onOpen(webSocket, response)
 
-            isWebSocketConnected = true
-            setWebSocketState("Connected")
+            setWebSocketState(WebSocketState.CONNECTED)
             println("Connected to the WebSocket server.")
         }
 
@@ -57,25 +57,22 @@ class LeaderboardService(val project: Project): Disposable {
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             super.onFailure(webSocket, t, response)
 
-            isWebSocketConnected = false
             println("Error: ${t.message}")
-            setWebSocketState("Error: ${t.message}")
+            setWebSocketState(WebSocketState.ERROR)
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
             super.onClosing(webSocket, code, reason)
 
-            isWebSocketConnected = false
             println("WebSocket closing: $reason")
-            setWebSocketState("Disconnecting")
+            setWebSocketState(WebSocketState.DISCONNECTING)
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             super.onClosed(webSocket, code, reason)
 
-            isWebSocketConnected = false
             println("WebSocket closed: $reason")
-            setWebSocketState("Disconnected")
+            setWebSocketState(WebSocketState.DISCONNECTED)
         }
     }
 
@@ -83,16 +80,17 @@ class LeaderboardService(val project: Project): Disposable {
         println("Leaderboard service")
 
         val properties = PropertiesComponent.getInstance()
-        val uuid = properties.getValue("uuid")
 
-        if (uuid == null) {
-            properties.setValue("uuid", userUUID)
+        if (properties.isValueSet("uuid")) {
+            userUUID = properties.getValue("uuid")!!
+            println("Uuid already set : $userUUID")
         }else{
-            userUUID = uuid
+            userUUID = UUID.randomUUID().toString()
+            properties.setValue("uuid", userUUID)
+            println("New uuid set : $userUUID")
         }
 
         println("userUUID $userUUID")
-
         connectToWebSocket()
     }
 
@@ -103,9 +101,11 @@ class LeaderboardService(val project: Project): Disposable {
     private fun connectToWebSocket(){
         println("Connect to $url")
 
-        if(isWebSocketConnected){
+        if(webSocketState == WebSocketState.CONNECTED){
             webSocketClient.close(4000, "Reconnection wanted")
         }
+
+        setWebSocketState(WebSocketState.CONNECTING)
 
         webSocketClient = httpClient.newWebSocket(request, webSocketListener)
     }
@@ -114,15 +114,35 @@ class LeaderboardService(val project: Project): Disposable {
         connectToWebSocket()
     }
 
-    fun getWebSocketState() : String{
+    fun disconnect(){
+        if(webSocketState == WebSocketState.CONNECTED){
+            webSocketClient.close(4001, "User require disconnecting")
+        }
+    }
+
+    fun getWebSocketState() : WebSocketState{
         return webSocketState
     }
 
-    private fun setWebSocketState(state: String){
+    fun setUsername(username: String){
+        this.username = username
+        webSocketClient.send(
+            gson.toJson(UpdateUsernameCommand(
+        "updateUsername",
+                UpdateUsernameCommandData(userUUID, username)
+            ))
+        )
+    }
+
+    fun getUsername(): String{
+        return username
+    }
+
+    private fun setWebSocketState(state: WebSocketState){
         println("Web socket state : $state")
         webSocketState = state
 
-        AchievementToolWindow.refresh()
+        GamificationToolWindow.refresh()
     }
 
     private fun onReceiveMessage(message: String){
@@ -133,7 +153,7 @@ class LeaderboardService(val project: Project): Disposable {
         if(command.action == "initUsers"){
             val initUsersCommand = gson.fromJson(message, UserData.InitUsers::class.java)
             Leaderboard.setUsers(initUsersCommand.payload)
-            AchievementToolWindow.refresh()
+            GamificationToolWindow.refresh()
         }else if(command.action == "onUserPointsUpdated"){
             val onUserPointsUpdatedCommand = gson.fromJson(message, OnUserPointsUpdatedCommand::class.java)
             val data = onUserPointsUpdatedCommand.payload
@@ -144,7 +164,7 @@ class LeaderboardService(val project: Project): Disposable {
             }
 
             Leaderboard.updateUser(user)
-            AchievementToolWindow.refresh()
+            GamificationToolWindow.refresh()
         }
     }
 

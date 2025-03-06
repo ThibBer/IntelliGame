@@ -23,7 +23,7 @@
         <projectService serviceImplementation="de.uni_passau.fim.se2.intelligame.services.LeaderboardService"/>
         <notificationGroup id="Gamification" displayType="BALLOON"/>
         <!-- Change the id to something else (e.g. Personal ID) for the control group and change the group MyBundle.properties -->
-        <toolWindow factoryClass="de.uni_passau.fim.se2.intelligame.components.AchievementToolWindow" id="Gamification"/>
+        <toolWindow factoryClass="de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow" id="Gamification"/>
         <postStartupActivity implementation="de.uni_passau.fim.se2.intelligame.listeners.ProjectActivity" />
     </extensions>
 </idea-plugin>

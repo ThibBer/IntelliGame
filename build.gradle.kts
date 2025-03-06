@@ -30,7 +30,6 @@ dependencies {
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")
     implementation("com.github.tsantalis:refactoring-miner:2.2.0")
     implementation("org.apache.commons:commons-csv:1.10.0")
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r")
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
     implementation("com.google.code.gson:gson:2.12.1")
 }

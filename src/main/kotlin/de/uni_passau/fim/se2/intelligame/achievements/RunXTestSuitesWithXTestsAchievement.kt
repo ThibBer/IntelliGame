@@ -45,7 +45,9 @@ object RunXTestSuitesWithXTestsAchievement : SMTRunnerEventsListener, Achievemen
     override fun onTestsCountInSuite(count: Int) = Unit
 
     override fun onTestStarted(test: SMTestProxy) {
-        if (project == null) project = Util.getProject(test.locationUrl)
+        if (project == null) {
+            project = Util.getProject(test.locationUrl)
+        }
     }
 
     override fun onTestFinished(test: SMTestProxy) = Unit
@@ -105,16 +107,19 @@ object RunXTestSuitesWithXTestsAchievement : SMTRunnerEventsListener, Achievemen
 
     private fun requiredTestsInSuite(): Int {
         val level = getLevel()
-        if (level > 1) {
-            if (level > 2) {
-                if (level > 3) {
-                    return 3000
-                }
-                return 1000
-            }
+        if (level <= 1) {
+            return 100
+        }
+
+        if (level <= 2) {
             return 500
         }
-        return 100
+
+        if (level <= 3) {
+            return 1000
+        }
+
+        return 3000
     }
 
     override fun supportsLanguages(): List<Language> {

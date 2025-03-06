@@ -18,34 +18,27 @@ package de.uni_passau.fim.se2.intelligame.components
 
 import com.intellij.ide.DataManager
 import com.intellij.openapi.actionSystem.PlatformDataKeys
-import com.intellij.openapi.components.service
-import com.intellij.openapi.components.services
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.JBColor.isBright
-import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBEmptyBorder
 import de.uni_passau.fim.se2.intelligame.achievements.Achievement.Language
-import de.uni_passau.fim.se2.intelligame.leaderboard.Leaderboard
-import de.uni_passau.fim.se2.intelligame.services.LeaderboardService
 import de.uni_passau.fim.se2.intelligame.util.Util
 import java.awt.BorderLayout
 import java.awt.Component
+import java.awt.Font
 import java.util.concurrent.TimeUnit
 import javax.swing.*
-import javax.swing.table.DefaultTableModel
+import javax.swing.table.DefaultTableCellRenderer
 
 
-class AchievementToolWindow : ToolWindowFactory {
-
+class GamificationToolWindow : ToolWindowFactory {
     private val contentFactory = ContentFactory.getInstance()
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
@@ -56,33 +49,11 @@ class AchievementToolWindow : ToolWindowFactory {
     }
 
     companion object {
-
         fun createPanel(project: Project): JComponent {
-            val panel = JPanel()
-            panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
-            panel.border = JBEmptyBorder(5)
+            val panel = JPanel(BorderLayout())
+            panel.border = JBEmptyBorder(10)
 
-            val model = DefaultTableModel(arrayOf(), arrayOf("#", "User", "Points"))
-            for((index, user) in Leaderboard.getUsers().withIndex()){
-                model.addRow(arrayOf(index + 1, user.name, user.points))
-            }
-
-            val usersTable = JBTable(model)
-            usersTable.autoResizeMode = JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS; // Auto resize
-
-            val scrollPane = JBScrollPane(usersTable)
-            scrollPane.setBorder(BorderFactory.createEmptyBorder())
-            scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-            panel.add(scrollPane, BorderLayout.CENTER)
-
-            val leaderboardService = project.service<LeaderboardService>()
-
-            val reconnectButton = JButton("Reconnect")
-            reconnectButton.addActionListener {leaderboardService.reconnect()}
-            panel.add(reconnectButton)
-
-            val stateLabel = JBLabel("State : " + leaderboardService.getWebSocketState())
-            panel.add(stateLabel)
+            LeaderboardUI.create(panel, project)
 
             return panel
         }
@@ -327,4 +298,21 @@ class AchievementToolWindow : ToolWindowFactory {
     }
 
     override fun shouldBeAvailable(project: Project) = true
+}
+
+class BoldRowRenderer(private val boldRow: Int) : DefaultTableCellRenderer() {
+    override fun getTableCellRendererComponent(
+        table: JTable, value: Any?, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int
+    ): Component {
+        val component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+
+        // Appliquer une police en gras à la ligne ciblée
+        component.font = if (row == boldRow) {
+            component.font.deriveFont(Font.BOLD)
+        } else {
+            component.font.deriveFont(Font.PLAIN)
+        }
+
+        return component
+    }
 }
