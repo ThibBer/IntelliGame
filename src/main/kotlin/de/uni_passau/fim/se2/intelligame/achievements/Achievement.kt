@@ -137,7 +137,7 @@ abstract class Achievement {
 
             val pointsToAdd = progress - progress()
             println("${getName()} - pointsToAdd $pointsToAdd")
-            leaderboardService.addPoints(pointsToAdd, getName())
+            leaderboardService.addPoints(pointsToAdd, this::class.simpleName!!)
         }
 
         if (progress >= nextStep()) {

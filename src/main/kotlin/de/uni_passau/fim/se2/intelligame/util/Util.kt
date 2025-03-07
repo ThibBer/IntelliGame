@@ -19,9 +19,12 @@ package de.uni_passau.fim.se2.intelligame.util
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import de.uni_passau.fim.se2.intelligame.achievements.*
+import kotlin.random.Random
+
+val adjectives = listOf("Rapide", "Mystique", "Fou", "Brillant", "Sombre", "Éclair")
+val nouns = listOf("Tigre", "Phoenix", "Dragon", "Loup", "Hérisson", "Hibou", "Chat", "Renard")
 
 object Util {
-
     fun getAchievements(): List<Achievement> {
         return listOf(
             AddTestsAchievement,
@@ -117,5 +120,12 @@ object Util {
             }
         }
         return project
+    }
+
+    fun generatePseudo(): String {
+        val adj = adjectives.random()
+        val noun = nouns.random()
+        val number = Random.nextInt(1000)
+        return "$adj$noun$number"
     }
 }

@@ -4,6 +4,7 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.ui.JBColor
+import com.intellij.ui.SearchTextField
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
@@ -11,26 +12,34 @@ import com.intellij.util.ui.JBEmptyBorder
 import de.uni_passau.fim.se2.intelligame.leaderboard.Leaderboard
 import de.uni_passau.fim.se2.intelligame.services.LeaderboardService
 import de.uni_passau.fim.se2.intelligame.util.WebSocketState
-import jdk.nashorn.tools.ShellFunctions.input
-import java.awt.*
-import java.awt.event.ActionListener
+import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.Component
+import java.awt.Font
 import javax.swing.*
-import javax.swing.event.ChangeListener
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.DefaultTableModel
+import javax.swing.table.TableRowSorter
+
+
 
 
 class LeaderboardUI {
     companion object {
-        private var inputText: String = ""
+        private var usernameInputText: String = ""
+        private var searchInputText: String = ""
 
         fun create(panel: JPanel, project: Project) {
             val leaderboardService = project.service<LeaderboardService>()
 
             val properties = PropertiesComponent.getInstance()
             val userUUID = properties.getValue("uuid")!!
+
+            val topPanel = JPanel()
+            topPanel.border = JBEmptyBorder(0, 0, 10, 0)
+            topPanel.layout = BoxLayout(topPanel, BoxLayout.PAGE_AXIS)
 
             val usernamePanel = JPanel()
             usernamePanel.border = JBEmptyBorder(0, 0, 10, 0)
@@ -41,30 +50,47 @@ class LeaderboardUI {
             usernamePanel.add(label)
 
             val textField = JBTextField()
-            textField.text = inputText
-            println("Set default username textfield value to $inputText")
+            textField.text = usernameInputText.ifEmpty { leaderboardService.getUsername() }
+
+            usernamePanel.add(textField)
+
+            val validateButton = JButton("Validate")
+            validateButton.addActionListener {leaderboardService.setUsername(textField.text)}
+            validateButton.isEnabled = usernameInputText.isNotBlank() && usernameInputText != leaderboardService.getUsername()
+            usernamePanel.add(validateButton)
 
             textField.document.addDocumentListener(object : DocumentListener {
                 override fun insertUpdate(e: DocumentEvent?) {
-                    inputText = textField.text
+                    onTextChanged()
                 }
 
                 override fun removeUpdate(e: DocumentEvent?) {
-                    inputText = textField.text
+                    onTextChanged()
                 }
 
                 override fun changedUpdate(e: DocumentEvent?) {
 
                 }
+
+                private fun onTextChanged(){
+                    usernameInputText = textField.text.trim()
+                    validateButton.isEnabled = usernameInputText.isNotBlank() && usernameInputText != leaderboardService.getUsername()
+                }
             })
 
-            usernamePanel.add(textField)
+            topPanel.add(usernamePanel)
 
-            val validateButton = JButton("Validate")
-            usernamePanel.add(validateButton)
-            validateButton.addActionListener {leaderboardService.setUsername(textField.text)}
+            val searchPanel = JPanel()
+            searchPanel.border = JBEmptyBorder(0, 0, 10, 0)
+            searchPanel.layout = BoxLayout(searchPanel, BoxLayout.LINE_AXIS)
 
-            panel.add(usernamePanel, BorderLayout.NORTH)
+            val searchTextField = SearchTextField()
+            searchTextField.text = searchInputText
+
+            searchPanel.add(searchTextField)
+
+            topPanel.add(searchPanel)
+            panel.add(topPanel, BorderLayout.NORTH)
 
             val model = DefaultTableModel(arrayOf(), arrayOf("#", "User", "Points"))
             val users = Leaderboard.getUsers()
@@ -75,11 +101,16 @@ class LeaderboardUI {
                 }
             }
 
+            usersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
+            usersTable.setCellSelectionEnabled(false)
+
+            val sorter = TableRowSorter(model)
+            usersTable.setRowSorter(sorter)
+
             usersTable.rowHeight = 30
-            usersTable.setAutoCreateRowSorter(true);
 
             for(iUser in users.indices){
-                model.addRow(arrayOf(iUser + 1, users[iUser].name, users[iUser].points))
+                model.addRow(arrayOf(iUser + 1, users[iUser].username, users[iUser].points))
             }
 
             val currentUserIndex = users.indexOfFirst { it.id == userUUID }
@@ -88,8 +119,10 @@ class LeaderboardUI {
                     table: JTable, value: Any?, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int
                 ): Component {
                     val component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
-                    component.font = if (row == currentUserIndex) component.font.deriveFont(Font.BOLD) else component.font.deriveFont(
-                        Font.PLAIN)
+                    component.font = component.font.deriveFont(
+                        if (row == currentUserIndex) Font.BOLD else Font.PLAIN
+                    )
+
                     return component
                 }
             }
@@ -113,6 +146,28 @@ class LeaderboardUI {
             scrollPane.setBorder(BorderFactory.createEmptyBorder())
             scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT)
             panel.add(scrollPane, BorderLayout.CENTER)
+
+            searchTextField.addDocumentListener(object : DocumentListener {
+                override fun insertUpdate(e: DocumentEvent?) {
+                    onTextChanged()
+                }
+
+                override fun removeUpdate(e: DocumentEvent?) {
+                    onTextChanged()
+                }
+
+                override fun changedUpdate(e: DocumentEvent?) {}
+
+                private fun onTextChanged(){
+                    searchInputText = searchTextField.text.trim()
+
+                    if (searchInputText.isBlank()) {
+                        sorter.setRowFilter(null)
+                    } else {
+                        sorter.setRowFilter(RowFilter.regexFilter("(?i)$searchInputText", 1))
+                    }
+                }
+            })
 
             val webSocketState = leaderboardService.getWebSocketState()
             val isWebSocketConnected = webSocketState == WebSocketState.CONNECTED

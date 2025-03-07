@@ -21,7 +21,7 @@ object Leaderboard {
     }
 
     fun updateUser(newUserData: User) {
-        var user = users.find { it.id == newUserData.id }
+        val user = users.find { it.id == newUserData.id }
         if(user != null) {
             removeUser(user)
             addUser(newUserData)
@@ -33,18 +33,11 @@ object Leaderboard {
     }
 
     fun setUsers(users: List<User>) {
-        println("Set users")
-        println(users)
-
         reset()
 
         for(user in users){
             this.users.add(user)
-            println("Add user : $user")
         }
-
-        println("After users")
-        println(users)
 
         sort()
     }

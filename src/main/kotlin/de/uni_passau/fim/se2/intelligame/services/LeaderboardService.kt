@@ -27,6 +27,7 @@ import de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow
 import de.uni_passau.fim.se2.intelligame.leaderboard.Leaderboard
 import de.uni_passau.fim.se2.intelligame.leaderboard.command.*
 import de.uni_passau.fim.se2.intelligame.util.Logger
+import de.uni_passau.fim.se2.intelligame.util.Util
 import de.uni_passau.fim.se2.intelligame.util.WebSocketState
 import okhttp3.*
 import java.util.*
@@ -38,6 +39,7 @@ class LeaderboardService(val project: Project): Disposable {
     private var webSocketState = WebSocketState.DISCONNECTED
     private var userUUID = ""
     private var username = ""
+    private val properties = PropertiesComponent.getInstance()
 
     private var url = MyBundle.getMessage("websocketURL")
     private val request = Request.Builder().url(url).build()
@@ -47,6 +49,12 @@ class LeaderboardService(val project: Project): Disposable {
 
             setWebSocketState(WebSocketState.CONNECTED)
             println("Connected to the WebSocket server.")
+
+            webSocket.send(gson.toJson(
+                UserConnectedCommand(
+                    UserConnectedCommandData(userUUID, username)
+                )
+            ))
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -79,31 +87,33 @@ class LeaderboardService(val project: Project): Disposable {
     init {
         println("Leaderboard service")
 
-        val properties = PropertiesComponent.getInstance()
+        userUUID = getPropertyValue("uuid", UUID.randomUUID().toString())
+        username = getPropertyValue("username", Util.generatePseudo())
 
-        if (properties.isValueSet("uuid")) {
-            userUUID = properties.getValue("uuid")!!
-            println("Uuid already set : $userUUID")
-        }else{
-            userUUID = UUID.randomUUID().toString()
-            properties.setValue("uuid", userUUID)
-            println("New uuid set : $userUUID")
-        }
-
-        println("userUUID $userUUID")
         connectToWebSocket()
     }
 
+    private fun getPropertyValue(key: String, defaultValue: String): String{
+        if (properties.isValueSet(key)) {
+            return properties.getValue(key)!!
+        }
+
+        properties.setValue(key, defaultValue)
+        return defaultValue
+    }
+
     fun addPoints(pointsToAdd: Int, achievementName: String){
-        webSocketClient.send(gson.toJson(AddPointCommand("addPoints", AddPointCommandData(userUUID, pointsToAdd, achievementName))))
+        webSocketClient.send(gson.toJson(
+            AddPointsCommand(
+                AddPointsCommandData(userUUID, pointsToAdd, achievementName)
+            )
+        ))
     }
 
     private fun connectToWebSocket(){
         println("Connect to $url")
 
-        if(webSocketState == WebSocketState.CONNECTED){
-            webSocketClient.close(4000, "Reconnection wanted")
-        }
+        disconnect()
 
         setWebSocketState(WebSocketState.CONNECTING)
 
@@ -114,7 +124,7 @@ class LeaderboardService(val project: Project): Disposable {
         connectToWebSocket()
     }
 
-    fun disconnect(){
+    private fun disconnect(){
         if(webSocketState == WebSocketState.CONNECTED){
             webSocketClient.close(4001, "User require disconnecting")
         }
@@ -126,9 +136,10 @@ class LeaderboardService(val project: Project): Disposable {
 
     fun setUsername(username: String){
         this.username = username
+        properties.setValue("username", username)
+
         webSocketClient.send(
             gson.toJson(UpdateUsernameCommand(
-        "updateUsername",
                 UpdateUsernameCommandData(userUUID, username)
             ))
         )
@@ -148,23 +159,37 @@ class LeaderboardService(val project: Project): Disposable {
     private fun onReceiveMessage(message: String){
         println("Received message: $message")
         val command = gson.fromJson(message, Command.Default::class.java)
-        println("Command action : " + command.action)
 
-        if(command.action == "initUsers"){
-            val initUsersCommand = gson.fromJson(message, UserData.InitUsers::class.java)
-            Leaderboard.setUsers(initUsersCommand.payload)
-            GamificationToolWindow.refresh()
-        }else if(command.action == "onUserPointsUpdated"){
-            val onUserPointsUpdatedCommand = gson.fromJson(message, OnUserPointsUpdatedCommand::class.java)
-            val data = onUserPointsUpdatedCommand.payload
-            val user = data.user
-
-            if(user.id == userUUID){
-                showNotification("You have earned ${data.earnedPoints} points.")
+        when (command.action) {
+            "onInitUsers" -> {
+                val initUsersCommand = gson.fromJson(message, UserData.InitUsers::class.java)
+                Leaderboard.setUsers(initUsersCommand.payload)
+                GamificationToolWindow.refresh()
             }
+            "onUserPointsUpdated" -> {
+                val onUserPointsUpdatedCommand = gson.fromJson(message, OnUserPointsUpdatedCommand::class.java)
+                val data = onUserPointsUpdatedCommand.payload
+                val user = data.user
 
-            Leaderboard.updateUser(user)
-            GamificationToolWindow.refresh()
+                if(user.id == userUUID){
+                    showNotification("You have earned ${data.earnedPoints} points.")
+                }
+
+                Leaderboard.updateUser(user)
+                GamificationToolWindow.refresh()
+            }
+            "onUserAdded" -> {
+                val onUserAddedCommand = gson.fromJson(message, OnUserAddedCommand::class.java)
+
+                Leaderboard.addUser(onUserAddedCommand.payload)
+                GamificationToolWindow.refresh()
+            }
+            "onUsernameUpdated" -> {
+                val onUsernameUpdatedCommand = gson.fromJson(message, OnUsernameUpdatedCommand::class.java)
+
+                Leaderboard.updateUser(onUsernameUpdatedCommand.payload)
+                GamificationToolWindow.refresh()
+            }
         }
     }
 
