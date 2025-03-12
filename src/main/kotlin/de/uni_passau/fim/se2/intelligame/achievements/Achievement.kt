@@ -169,4 +169,13 @@ abstract class Achievement {
     }
 
     abstract fun supportsLanguages(): List<Language>
+
+    open fun getPropertyKey(): String{
+        println(this::class.simpleName!!)
+        return this::class.simpleName!!
+    }
+
+    open fun getLevelPropertyKey(): String{
+        return getPropertyKey() + "Level"
+    }
 }

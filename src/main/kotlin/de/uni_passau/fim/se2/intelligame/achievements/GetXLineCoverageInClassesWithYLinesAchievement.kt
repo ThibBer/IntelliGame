@@ -53,7 +53,7 @@ object GetXLineCoverageInClassesWithYLinesAchievement : Achievement() {
 
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        val value = properties.getValue("GetXLineCoverageInClassesWithYLinesAchievement", "")
+        val value = properties.getValue(getPropertyKey(), "")
         return if (value == "") {
             0
         } else {
@@ -65,22 +65,22 @@ object GetXLineCoverageInClassesWithYLinesAchievement : Achievement() {
 
     private fun updateClassesWhichFulfillRequirements(classesWhichFulfillRequirements: String) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("GetXLineCoverageInClassesWithYLinesAchievement", classesWhichFulfillRequirements, "")
+        properties.setValue(getPropertyKey(), classesWhichFulfillRequirements, "")
     }
 
     fun getClassesWhichFulfillRequirements(): String {
         val properties = PropertiesComponent.getInstance()
-        return properties.getValue("GetXLineCoverageInClassesWithYLinesAchievement", "")
+        return properties.getValue(getPropertyKey(), "")
     }
 
     override fun getLevel(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("GetXLineCoverageInClassesWithYLinesAchievementLevel", 0)
+        return properties.getInt(getLevelPropertyKey(), 0)
     }
 
     private fun increaseLevel() {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("GetXLineCoverageInClassesWithYLinesAchievementLevel", (getLevel() + 1), 0)
+        properties.setValue(getLevelPropertyKey(), (getLevel() + 1), 0)
     }
 
     override fun getDescription(): String {

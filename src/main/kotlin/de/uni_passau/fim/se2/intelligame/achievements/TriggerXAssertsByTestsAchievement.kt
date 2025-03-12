@@ -92,14 +92,18 @@ object TriggerXAssertsByTestsAchievement : SMTRunnerEventsListener, Achievement(
 
     override fun onSuiteTreeStarted(suite: SMTestProxy?) = Unit
 
+    override fun getPropertyKey(): String {
+        return "AssertTriggeredByTest"
+    }
+
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("assertTriggeredByTest", 0)
+        return properties.getInt(getPropertyKey(), 0)
     }
 
     override fun updateProgress(progress: Int) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("assertTriggeredByTest", progress, 0)
+        properties.setValue(getPropertyKey(), progress, 0)
     }
 
     override fun getDescription(): String {

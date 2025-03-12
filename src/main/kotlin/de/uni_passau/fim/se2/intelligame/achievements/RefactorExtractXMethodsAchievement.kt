@@ -28,12 +28,12 @@ object RefactorExtractXMethodsAchievement : Achievement() {
 
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("RefactorExtractXMethodsAchievement", 0)
+        return properties.getInt(getPropertyKey(), 0)
     }
 
     override fun updateProgress(progress: Int) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("RefactorExtractXMethodsAchievement", progress, 0)
+        properties.setValue(getPropertyKey(), progress, 0)
     }
 
     override fun getDescription(): String {

@@ -76,12 +76,12 @@ object RunXTestSuitesAchievement : SMTRunnerEventsListener, Achievement() {
 
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("runXTestSuitesAchievement", 0)
+        return properties.getInt(RunXDebuggerModeAchievement.getPropertyKey(), 0)
     }
 
     override fun updateProgress(progress: Int) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("runXTestSuitesAchievement", progress, 0)
+        properties.setValue(RunXDebuggerModeAchievement.getPropertyKey(), progress, 0)
     }
 
     override fun getDescription(): String {

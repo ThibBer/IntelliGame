@@ -74,22 +74,22 @@ object RunXTestSuitesWithXTestsAchievement : SMTRunnerEventsListener, Achievemen
 
     override fun getLevel(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("runXTestSuitesWithXTestsAchievementLevel", 0)
+        return properties.getInt(getLevelPropertyKey(), 0)
     }
 
     private fun increaseLevel() {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("runXTestSuitesWithXTestsAchievementLevel", (getLevel() + 1), 0)
+        properties.setValue(getLevelPropertyKey(), (getLevel() + 1), 0)
     }
 
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("runXTestSuitesWithXTestsAchievement", 0)
+        return properties.getInt(getPropertyKey(), 0)
     }
 
     override fun updateProgress(progress: Int) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("runXTestSuitesWithXTestsAchievement", progress, 0)
+        properties.setValue(getPropertyKey(), progress, 0)
         if (progress >= nextStep()) increaseLevel()
     }
 

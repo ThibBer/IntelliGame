@@ -29,14 +29,18 @@ object RunXDebuggerModeAchievement : XDebuggerManagerListener,
         super.processStarted(debugProcess)
     }
 
+    override fun getPropertyKey(): String {
+        return "ExecutedDebugger"
+    }
+
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("executedDebugger", 0)
+        return properties.getInt(getPropertyKey(), 0)
     }
 
     override fun updateProgress(progress: Int) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("executedDebugger", progress, 0)
+        properties.setValue(getPropertyKey(), progress, 0)
     }
 
     override fun getDescription(): String {

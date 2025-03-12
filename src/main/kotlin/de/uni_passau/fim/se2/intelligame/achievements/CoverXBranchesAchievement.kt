@@ -29,12 +29,12 @@ object CoverXBranchesAchievement : Achievement() {
 
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("CoverXBranchesAchievement", 0)
+        return properties.getInt(getPropertyKey(), 0)
     }
 
     override fun updateProgress(progress: Int) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("CoverXBranchesAchievement", progress, 0)
+        properties.setValue(getPropertyKey(), progress, 0)
     }
 
     override fun getDescription(): String {

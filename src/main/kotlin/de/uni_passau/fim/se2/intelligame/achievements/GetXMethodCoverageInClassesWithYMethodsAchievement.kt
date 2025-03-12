@@ -65,22 +65,22 @@ object GetXMethodCoverageInClassesWithYMethodsAchievement : Achievement() {
 
     private fun updateClassesWhichFulfillRequirements(classesWhichFulfillRequirements: String) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("GetXMethodCoverageInClassesWithYMethodsAchievement", classesWhichFulfillRequirements, "")
+        properties.setValue(getPropertyKey(), classesWhichFulfillRequirements, "")
     }
 
     private fun getClassesWhichFulfillRequirements(): String {
         val properties = PropertiesComponent.getInstance()
-        return properties.getValue("GetXMethodCoverageInClassesWithYMethodsAchievement", "")
+        return properties.getValue(getPropertyKey(), "")
     }
 
     override fun getLevel(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("GetXMethodCoverageInClassesWithYMethodsAchievementLevel", 0)
+        return properties.getInt(getLevelPropertyKey(), 0)
     }
 
     private fun increaseLevel() {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("GetXMethodCoverageInClassesWithYMethodsAchievementLevel", (getLevel() + 1), 0)
+        properties.setValue(getLevelPropertyKey(), (getLevel() + 1), 0)
     }
 
     override fun getDescription(): String {

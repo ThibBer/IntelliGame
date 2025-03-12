@@ -59,9 +59,9 @@ object RepairXWrongTestsAchievement : SMTRunnerEventsListener, Achievement() {
         val codeFile = File(pathToCode)
         if (key != null && testFile.exists() && codeFile.exists()) {
             val testFileContent = FileUtils.readFileToString(testFile, Charset.defaultCharset())
-                .replace(System.getProperty("line.separator"), "")
+                .replace(System.lineSeparator(), "")
             val codeFileContent = FileUtils.readFileToString(codeFile, Charset.defaultCharset())
-                .replace(System.getProperty("line.separator"), "")
+                .replace(System.lineSeparator(), "")
             if (test.magnitudeInfo == TestStateInfo.Magnitude.FAILED_INDEX) {
                 if (!testsUnderObservation.containsKey(key) && !classesUnderObservation.containsKey(key)) {
                     testsUnderObservation[key] = testFileContent
@@ -104,14 +104,18 @@ object RepairXWrongTestsAchievement : SMTRunnerEventsListener, Achievement() {
 
     override fun onSuiteTreeStarted(suite: SMTestProxy?) = Unit
 
+    override fun getPropertyKey(): String{
+        return "RepairedXTests"
+    }
+
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("repairedXTests", 0)
+        return properties.getInt(getPropertyKey(), 0)
     }
 
     override fun updateProgress(progress: Int) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("repairedXTests", progress, 0)
+        properties.setValue(getPropertyKey(), progress, 0)
     }
 
     override fun getDescription(): String {

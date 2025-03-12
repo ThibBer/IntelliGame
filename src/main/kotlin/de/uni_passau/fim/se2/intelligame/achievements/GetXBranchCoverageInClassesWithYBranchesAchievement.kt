@@ -53,7 +53,7 @@ object GetXBranchCoverageInClassesWithYBranchesAchievement : Achievement() {
 
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        val value = properties.getValue("GetXBranchCoverageInClassesWithYBranchesAchievement", "")
+        val value = properties.getValue(getPropertyKey(), "")
         return if (value == "") {
             0
         } else {
@@ -65,22 +65,22 @@ object GetXBranchCoverageInClassesWithYBranchesAchievement : Achievement() {
 
     private fun updateClassesWhichFulfillRequirements(classesWhichFulfillRequirements: String) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("GetXBranchCoverageInClassesWithYBranchesAchievement", classesWhichFulfillRequirements, "")
+        properties.setValue(getPropertyKey(), classesWhichFulfillRequirements, "")
     }
 
     private fun getClassesWhichFulfillRequirements(): String {
         val properties = PropertiesComponent.getInstance()
-        return properties.getValue("GetXBranchCoverageInClassesWithYBranchesAchievement", "")
+        return properties.getValue(getPropertyKey(), "")
     }
 
     override fun getLevel(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt("GetXBranchCoverageInClassesWithYBranchesAchievementLevel", 0)
+        return properties.getInt(getLevelPropertyKey(), 0)
     }
 
     private fun increaseLevel() {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue("GetXBranchCoverageInClassesWithYBranchesAchievementLevel", (getLevel() + 1), 0)
+        properties.setValue(getLevelPropertyKey(), (getLevel() + 1), 0)
     }
 
     override fun getDescription(): String {
