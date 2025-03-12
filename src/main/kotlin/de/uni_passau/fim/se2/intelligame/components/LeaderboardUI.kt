@@ -13,6 +13,7 @@ import de.uni_passau.fim.se2.intelligame.util.WebSocketState
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Font
+import java.util.*
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
@@ -32,7 +33,7 @@ class LeaderboardUI {
             panel.border = JBEmptyBorder(10)
 
             val properties = PropertiesComponent.getInstance()
-            val userUUID = properties.getValue("gamification-user-id")!!
+            val userUUID = properties.getValue("gamification-user-id")
 
             val topPanel = JPanel()
             topPanel.border = JBEmptyBorder(0, 0, 10, 0)

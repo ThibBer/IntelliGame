@@ -24,6 +24,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.EditorNotifications
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.ui.content.ContentFactory
 import de.uni_passau.fim.se2.intelligame.services.GamificationService
@@ -63,8 +64,13 @@ class GamificationToolWindow : ToolWindowFactory {
             tabbedPane.addTab("Badges", badges)
 
             tabbedPane.addChangeListener {
-                gamificationService.setGameMode(GameMode.entries[tabbedPane.selectedIndex])
+                if(GameMode.entries.count() < tabbedPane.selectedIndex){
+                    gamificationService.setGameMode(GameMode.entries[tabbedPane.selectedIndex])
+                }
             }
+
+            val settings = SettingsUI.create(project)
+            tabbedPane.addTab("Settings", settings)
 
             tabbedPane.selectedIndex = gamificationService.getGameMode().ordinal
 
