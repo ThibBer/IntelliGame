@@ -18,7 +18,9 @@ package de.uni_passau.fim.se2.intelligame.util
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.roots.ProjectRootManager
 import de.uni_passau.fim.se2.intelligame.achievements.*
+import java.io.File
 import kotlin.random.Random
 
 val adjectives = listOf("Rapide", "Mystique", "Fou", "Brillant", "Sombre", "Éclair")
@@ -127,5 +129,13 @@ object Util {
         val noun = nouns.random()
         val number = Random.nextInt(1000)
         return "$adj$noun$number"
+    }
+
+    fun getEvaluationDirectoryPath(project: Project): String{
+        return ProjectRootManager.getInstance(project).contentRoots[0].path + "${File.separator}.evaluation${File.separator}"
+    }
+
+    fun getEvaluationFilePath(project: Project, filename: String): String{
+        return getEvaluationDirectoryPath(project) + File.separator + filename
     }
 }

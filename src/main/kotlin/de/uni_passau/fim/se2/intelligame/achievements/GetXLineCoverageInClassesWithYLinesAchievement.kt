@@ -98,30 +98,37 @@ object GetXLineCoverageInClassesWithYLinesAchievement : Achievement() {
 
     private fun requiredCoverage(): Double {
         val level = getLevel()
-        if (level > 1) {
-            if (level > 2) {
-                if (level > 3) {
-                    return 0.90
-                }
-                return 0.85
-            }
-            return 0.80
+
+        if (level <= 1) {
+            return 0.7
         }
-        return 0.7
+
+        if (level <= 2) {
+            return 0.8
+        }
+
+        if (level <= 3) {
+            return 0.85
+        }
+
+        return 0.9
     }
 
     private fun requiredTotalLines(): Int {
         val level = getLevel()
-        if (level > 1) {
-            if (level > 2) {
-                if (level > 3) {
-                    return 500
-                }
-                return 250
-            }
+        if (level <= 1) {
+            return 5
+        }
+
+        if (level <= 2) {
             return 25
         }
-        return 5
+
+        if (level <= 3) {
+            return 250
+        }
+
+        return 500
     }
 
     override fun supportsLanguages(): List<Language> {

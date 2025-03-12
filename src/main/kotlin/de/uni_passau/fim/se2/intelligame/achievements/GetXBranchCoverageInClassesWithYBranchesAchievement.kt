@@ -100,30 +100,36 @@ object GetXBranchCoverageInClassesWithYBranchesAchievement : Achievement() {
 
     private fun requiredCoverage(): Double {
         val level = getLevel()
-        if (level > 1) {
-            if (level > 2) {
-                if (level > 3) {
-                    return 0.90
-                }
-                return 0.85
-            }
+        if (level <= 1) {
+            return 0.75
+        }
+
+        if (level <= 2) {
             return 0.80
         }
-        return 0.75
+
+        if (level <= 3) {
+            return 0.85
+        }
+
+        return 0.90
     }
 
     private fun requiredTotalBranches(): Int {
         val level = getLevel()
-        if (level > 1) {
-            if (level > 2) {
-                if (level > 3) {
-                    return 500
-                }
-                return 250
-            }
+        if (level <= 1) {
+            return 15
+        }
+
+        if (level <= 2) {
             return 50
         }
-        return 15
+
+        if (level <= 3) {
+            return 250
+        }
+
+        return 500
     }
 
     override fun supportsLanguages(): List<Language> {

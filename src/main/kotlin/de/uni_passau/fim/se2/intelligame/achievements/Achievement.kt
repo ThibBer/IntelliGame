@@ -25,13 +25,13 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow
-import de.uni_passau.fim.se2.intelligame.services.LeaderboardService
+import de.uni_passau.fim.se2.intelligame.services.GamificationService
 import de.uni_passau.fim.se2.intelligame.util.CSVReportGenerator
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 import de.uni_passau.fim.se2.intelligame.util.Logger
 import java.util.concurrent.TimeUnit
 
 abstract class Achievement {
-
     enum class Language {
         Java, JavaScript
     }
@@ -87,8 +87,12 @@ abstract class Achievement {
      * Shows the balloon with the given message.
      */
     fun showAchievementNotification(message: String, project: Project?) {
-        NotificationGroupManager.getInstance().getNotificationGroup("Gamification")
-            .createNotification(
+        if(project != null && project.service<GamificationService>().getGameMode() != GameMode.ACHIEVEMENTS){
+            return
+        }
+
+        val group = NotificationGroupManager.getInstance().getNotificationGroup("Gamification")
+        val notification = group.createNotification(
                 message,
                 NotificationType.INFORMATION
             )
@@ -100,7 +104,8 @@ abstract class Achievement {
                     toolWindow.show()
                 }
             )
-            .notify(null)
+
+        notification.notify(null)
 
         Logger.logStatus(message, Logger.Kind.Notification, project)
     }
@@ -133,29 +138,32 @@ abstract class Achievement {
 
     protected fun handleProgress(progress: Int, project: Project?) {
         if(project != null){
-            val leaderboardService = project.service<LeaderboardService>()
+            val gamificationService = project.service<GamificationService>()
 
             val pointsToAdd = progress - progress()
-            println("${getName()} - pointsToAdd $pointsToAdd")
-            leaderboardService.addPoints(pointsToAdd, this::class.simpleName!!)
+            gamificationService.addPoints(pointsToAdd, this::class)
         }
 
         if (progress >= nextStep()) {
             updateProgress(progress)
-            showAchievementNotification("Congratulations! You unlocked level " + getLevel() + " of the '"
-                    + getName() + "' achievement!", project)
+            showAchievementNotification(
+                "Congratulations! You unlocked level ${getLevel()} of the '${getName()}' achievement!", project
+            )
         } else {
             val progressGroupBeforeUpdate = getProgressGroup()
             updateProgress(progress)
+
             val progressGroupAfterUpdate = getProgressGroup()
             if (progressGroupAfterUpdate.first > progressGroupBeforeUpdate.first) {
                 showAchievementNotification(
                     "You are making progress on an achievement! You have already reached " +
                             progressGroupAfterUpdate.second + "% of the next level of the '" +
-                            getName() + "' achievement!", project
+                            getName() + "' achievement!",
+                    project
                 )
             }
         }
+
         refreshWindow()
         CSVReportGenerator.generateCSVReport(project)
     }

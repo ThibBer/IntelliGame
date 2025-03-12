@@ -122,16 +122,19 @@ object FindXBugsAchievement : SMTRunnerEventsListener, Achievement() {
     }
 
     override fun nextStep(): Int {
-        if (progress() > 3) {
-            if (progress() > 10) {
-                if (progress() > 100) {
-                    return 1000
-                }
-                return 100
-            }
+        if (progress() <= 3) {
+            return 3
+        }
+
+        if (progress() <= 10) {
             return 10
         }
-        return 3
+
+        if (progress() <= 100) {
+            return 100
+        }
+
+        return 1000
     }
 
     override fun supportsLanguages(): List<Language> {

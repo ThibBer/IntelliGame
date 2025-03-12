@@ -12,12 +12,8 @@ object Leaderboard {
         sort()
     }
 
-    fun removeUser(user: User) {
+    private fun removeUser(user: User) {
         users.remove(user)
-    }
-
-    fun getByUserId(id: String) : User? {
-        return users.firstOrNull { it.id == id }
     }
 
     fun updateUser(newUserData: User) {

@@ -19,28 +19,21 @@ package de.uni_passau.fim.se2.intelligame.services
 import com.intellij.coverage.CoverageDataManagerImpl
 import com.intellij.execution.ExecutionManager
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.breakpoints.XBreakpointListener
-import de.uni_passau.fim.se2.intelligame.MyBundle
 import de.uni_passau.fim.se2.intelligame.achievements.*
-import de.uni_passau.fim.se2.intelligame.listeners.*
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
-import java.io.File
-import java.sql.Timestamp
-import java.util.UUID
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import de.uni_passau.fim.se2.intelligame.listeners.BulkFileListenerImpl
+import de.uni_passau.fim.se2.intelligame.listeners.ConsoleListener
+import de.uni_passau.fim.se2.intelligame.listeners.CoverageListener
 
 
 class ProjectService(project: Project): Disposable {
 
     init {
-        println(MyBundle.message("projectService", project.name))
+        println("Project service")
 
         project.messageBus.connect().subscribe(SMTRunnerEventsListener.TEST_STATUS, TriggerXAssertsByTestsAchievement)
         project.messageBus.connect().subscribe(XDebuggerManager.TOPIC, RunXDebuggerModeAchievement)

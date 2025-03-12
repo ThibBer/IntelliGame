@@ -1,5 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin url="https://github.com/se2p/IntelliGame">
+<idea-plugin url="https://github.com/ThibBer/IntelliGame">
     <id>de.uni_passau.fim.se2.intelligame</id>
     <name>IntelliGame</name>
     <vendor url="https://www.fim.uni-passau.de/en/chair-for-software-engineering-ii">Chair for Software Engineering II</vendor>
@@ -18,9 +18,8 @@
     <depends>com.intellij.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="de.uni_passau.fim.se2.intelligame.services.MyApplicationService"/>
+        <projectService serviceImplementation="de.uni_passau.fim.se2.intelligame.services.GamificationService"/>
         <projectService serviceImplementation="de.uni_passau.fim.se2.intelligame.services.ProjectService"/>
-        <projectService serviceImplementation="de.uni_passau.fim.se2.intelligame.services.LeaderboardService"/>
         <notificationGroup id="Gamification" displayType="BALLOON"/>
         <!-- Change the id to something else (e.g. Personal ID) for the control group and change the group MyBundle.properties -->
         <toolWindow factoryClass="de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow" id="Gamification"/>

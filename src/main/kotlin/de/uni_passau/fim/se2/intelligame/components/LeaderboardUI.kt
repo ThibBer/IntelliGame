@@ -3,17 +3,14 @@ package de.uni_passau.fim.se2.intelligame.components
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.intellij.ui.JBColor
 import com.intellij.ui.SearchTextField
-import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBEmptyBorder
 import de.uni_passau.fim.se2.intelligame.leaderboard.Leaderboard
-import de.uni_passau.fim.se2.intelligame.services.LeaderboardService
+import de.uni_passau.fim.se2.intelligame.services.GamificationService
 import de.uni_passau.fim.se2.intelligame.util.WebSocketState
 import java.awt.BorderLayout
-import java.awt.Color
 import java.awt.Component
 import java.awt.Font
 import javax.swing.*
@@ -24,18 +21,18 @@ import javax.swing.table.DefaultTableModel
 import javax.swing.table.TableRowSorter
 
 
-
-
 class LeaderboardUI {
     companion object {
         private var usernameInputText: String = ""
         private var searchInputText: String = ""
 
-        fun create(panel: JPanel, project: Project) {
-            val leaderboardService = project.service<LeaderboardService>()
+        fun create(project: Project): JPanel {
+            val gamificationService = project.service<GamificationService>()
+            val panel = JPanel(BorderLayout())
+            panel.border = JBEmptyBorder(10)
 
             val properties = PropertiesComponent.getInstance()
-            val userUUID = properties.getValue("uuid")!!
+            val userUUID = properties.getValue("gamification-user-id")!!
 
             val topPanel = JPanel()
             topPanel.border = JBEmptyBorder(0, 0, 10, 0)
@@ -49,14 +46,20 @@ class LeaderboardUI {
             label.border = JBEmptyBorder(0, 0, 0, 10)
             usernamePanel.add(label)
 
+            val isWebSocketConnected = gamificationService.getWebSocketState() == WebSocketState.CONNECTED
             val textField = JBTextField()
-            textField.text = usernameInputText.ifEmpty { leaderboardService.getUsername() }
+            textField.text = usernameInputText.ifEmpty { gamificationService.getUsername() }
+            textField.isEnabled = isWebSocketConnected
 
             usernamePanel.add(textField)
 
             val validateButton = JButton("Validate")
-            validateButton.addActionListener {leaderboardService.setUsername(textField.text)}
-            validateButton.isEnabled = usernameInputText.isNotBlank() && usernameInputText != leaderboardService.getUsername()
+            validateButton.addActionListener {gamificationService.setUsername(textField.text)}
+            validateButton.isEnabled = (
+                usernameInputText.isNotBlank() &&
+                usernameInputText != gamificationService.getUsername() &&
+                isWebSocketConnected
+            )
             usernamePanel.add(validateButton)
 
             textField.document.addDocumentListener(object : DocumentListener {
@@ -74,7 +77,7 @@ class LeaderboardUI {
 
                 private fun onTextChanged(){
                     usernameInputText = textField.text.trim()
-                    validateButton.isEnabled = usernameInputText.isNotBlank() && usernameInputText != leaderboardService.getUsername()
+                    validateButton.isEnabled = usernameInputText.isNotBlank() && usernameInputText != gamificationService.getUsername()
                 }
             })
 
@@ -110,14 +113,12 @@ class LeaderboardUI {
             usersTable.rowHeight = 30
 
             for(iUser in users.indices){
-                model.addRow(arrayOf(iUser + 1, users[iUser].username, users[iUser].points))
+                model.addRow(arrayOf<Any>(iUser + 1, users[iUser].username, users[iUser].points))
             }
 
             val currentUserIndex = users.indexOfFirst { it.id == userUUID }
-            val renderer = object : DefaultTableCellRenderer() {
-                override fun getTableCellRendererComponent(
-                    table: JTable, value: Any?, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int
-                ): Component {
+            val boldRenderer = object : DefaultTableCellRenderer() {
+                override fun getTableCellRendererComponent(table: JTable, value: Any?, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Component {
                     val component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
                     component.font = component.font.deriveFont(
                         if (row == currentUserIndex) Font.BOLD else Font.PLAIN
@@ -126,21 +127,32 @@ class LeaderboardUI {
                     return component
                 }
             }
-
             for (i in 0 until usersTable.columnCount) {
-                usersTable.columnModel.getColumn(i).cellRenderer = renderer
+                usersTable.columnModel.getColumn(i).cellRenderer = boldRenderer
             }
-
-            val centerRenderer = DefaultTableCellRenderer()
-            centerRenderer.horizontalAlignment = JLabel.CENTER
 
             val firstColumn = usersTable.columnModel.getColumn(0)
             firstColumn.preferredWidth = 15
-            firstColumn.setCellRenderer(centerRenderer)
+            firstColumn.cellRenderer = object : DefaultTableCellRenderer() {
+                init {
+                    horizontalAlignment = JLabel.CENTER
+                }
+            }
 
-            firstColumn.headerRenderer = centerRenderer
+            val defaultHeaderRenderer = usersTable.tableHeader.defaultRenderer
+            firstColumn.headerRenderer = object : DefaultTableCellRenderer() {
+                init {
+                    horizontalAlignment = JLabel.CENTER
+                }
 
-            usersTable.autoResizeMode = JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS // Auto resize
+                override fun getTableCellRendererComponent(table: JTable?, value: Any?, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Component {
+                    val component = defaultHeaderRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+                    (component as JLabel).horizontalAlignment = JLabel.CENTER
+                    return component
+                }
+            }
+
+            usersTable.autoResizeMode = JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS
 
             val scrollPane = JBScrollPane(usersTable)
             scrollPane.setBorder(BorderFactory.createEmptyBorder())
@@ -169,24 +181,10 @@ class LeaderboardUI {
                 }
             })
 
-            val webSocketState = leaderboardService.getWebSocketState()
-            val isWebSocketConnected = webSocketState == WebSocketState.CONNECTED
+            val websocketPanel = WebsocketUI.create(project)
+            panel.add(websocketPanel, BorderLayout.SOUTH)
 
-            val statePanel = JPanel()
-
-            val stateLabel = JBLabel("State : $webSocketState")
-            if(!isWebSocketConnected){
-                stateLabel.foreground = JBColor.RED
-            }
-
-            statePanel.add(stateLabel)
-
-            val reconnectButton = JButton("Reconnect")
-            reconnectButton.isEnabled = !isWebSocketConnected
-            reconnectButton.addActionListener {leaderboardService.reconnect()}
-            statePanel.add(reconnectButton)
-
-            panel.add(statePanel, BorderLayout.SOUTH)
+            return panel
         }
     }
 }

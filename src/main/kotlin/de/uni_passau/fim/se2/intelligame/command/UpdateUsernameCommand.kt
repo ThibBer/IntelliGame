@@ -1,4 +1,4 @@
-package de.uni_passau.fim.se2.intelligame.leaderboard.command
+package de.uni_passau.fim.se2.intelligame.command
 
 data class UpdateUsernameCommand(val payload: UpdateUsernameCommandData){
     val action = "updateUsername"
