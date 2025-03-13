@@ -24,7 +24,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.ui.EditorNotifications
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.ui.content.ContentFactory
 import de.uni_passau.fim.se2.intelligame.services.GamificationService
@@ -51,7 +50,7 @@ class GamificationToolWindow : ToolWindowFactory {
         fun createPanel(project: Project): JComponent {
             val gamificationService = project.service<GamificationService>()
 
-            if(!properties.isValueSet("gamification-api-key")){
+            if(properties.getValue("gamification-api-key").isNullOrBlank()) {
                 return ApiSettingsUI.create(project)
             }
 
@@ -60,10 +59,12 @@ class GamificationToolWindow : ToolWindowFactory {
             val leaderboard = LeaderboardUI.create(project)
             tabbedPane.addTab("Leaderboard", leaderboard)
 
-            val badges = AchievementsUI.create(project)
-            tabbedPane.addTab("Badges", badges)
+            val achievements = AchievementsUI.create(project)
+            tabbedPane.addTab("Achievements", achievements)
 
             tabbedPane.addChangeListener {
+                properties.setValue("gamification-active-tabs", tabbedPane.selectedIndex.toString())
+
                 if(GameMode.entries.count() < tabbedPane.selectedIndex){
                     gamificationService.setGameMode(GameMode.entries[tabbedPane.selectedIndex])
                 }
@@ -72,7 +73,7 @@ class GamificationToolWindow : ToolWindowFactory {
             val settings = SettingsUI.create(project)
             tabbedPane.addTab("Settings", settings)
 
-            tabbedPane.selectedIndex = gamificationService.getGameMode().ordinal
+            tabbedPane.selectedIndex = properties.getValue("gamification-active-tabs", "0").toInt()
 
             return tabbedPane
         }

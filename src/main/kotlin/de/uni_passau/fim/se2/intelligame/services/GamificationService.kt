@@ -45,7 +45,7 @@ class GamificationService(val project: Project) : Disposable {
     private var webSocketState = WebSocketState.DISCONNECTED
     private val properties = PropertiesComponent.getInstance()
     private var gameMode: GameMode = GameMode.valueOf(
-        properties.getValue("gamification-active-tab", GameMode.LEADERBOARD.name)
+        properties.getValue("gamification-game-mode", GameMode.LEADERBOARD.name)
     )
 
     private var userId = ""
@@ -84,7 +84,6 @@ class GamificationService(val project: Project) : Disposable {
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             super.onFailure(webSocket, t, response)
 
-            println("Error: ${t.message}")
             Logger.logStatus("Websocket failure : ${t.message}", Logger.Kind.Error, project)
             setWebSocketState(WebSocketState.ERROR)
         }
@@ -276,7 +275,7 @@ class GamificationService(val project: Project) : Disposable {
 
     fun setGameMode(gameMode: GameMode) {
         this.gameMode = gameMode
-        properties.setValue("gamification-active-tab", gameMode.name)
+        properties.setValue("gamification-game-mode", gameMode.name)
     }
 
     fun getGameMode(): GameMode {
@@ -288,7 +287,7 @@ class GamificationService(val project: Project) : Disposable {
 
         disconnect()
 
-        properties.unsetValue("gamification-active-tab")
+        properties.unsetValue("gamification-game-mode")
         properties.unsetValue("gamification-username")
         properties.unsetValue("gamification-api-key")
 
@@ -300,7 +299,7 @@ class GamificationService(val project: Project) : Disposable {
         }
     }
 
-    fun sendExperimentData(files: List<File>) {
+    fun sendExperimentData(files: List<File>, callback: ((Int) -> Unit)? = null) {
         if (files.isEmpty()) {
             return
         }
@@ -331,6 +330,10 @@ class GamificationService(val project: Project) : Disposable {
                 showNotification("File successfully sent, thanks for your help ! \uD83D\uDE09")
             }else{
                 showNotification("Error occurred while trying to send files - ${response.code} | ${response.body.string()}")
+            }
+
+            if(callback != null){
+                callback(response.code)
             }
         }
     }

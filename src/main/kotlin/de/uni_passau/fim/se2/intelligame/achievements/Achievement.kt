@@ -137,41 +137,45 @@ abstract class Achievement {
     }
 
     protected fun handleProgress(progress: Int, project: Project?) {
-        if(project != null){
-            val gamificationService = project.service<GamificationService>()
-
-            val pointsToAdd = progress - progress()
-            gamificationService.addPoints(pointsToAdd, this::class)
+        if(project == null){
+            return
         }
 
-        if (progress >= nextStep()) {
-            updateProgress(progress)
-            showAchievementNotification(
-                "Congratulations! You unlocked level ${getLevel()} of the '${getName()}' achievement!", project
-            )
-        } else {
-            val progressGroupBeforeUpdate = getProgressGroup()
-            updateProgress(progress)
+        val gamificationService = project.service<GamificationService>()
 
-            val progressGroupAfterUpdate = getProgressGroup()
-            if (progressGroupAfterUpdate.first > progressGroupBeforeUpdate.first) {
+        val pointsToAdd = progress - progress()
+        gamificationService.addPoints(pointsToAdd, this::class)
+
+        if(gamificationService.getGameMode() == GameMode.ACHIEVEMENTS){
+            if (progress >= nextStep()) {
+                updateProgress(progress)
                 showAchievementNotification(
-                    "You are making progress on an achievement! You have already reached " +
-                            progressGroupAfterUpdate.second + "% of the next level of the '" +
-                            getName() + "' achievement!",
-                    project
+                    "Congratulations! You unlocked level ${getLevel()} of the '${getName()}' achievement!", project
                 )
+            } else {
+                val progressGroupBeforeUpdate = getProgressGroup()
+                updateProgress(progress)
+
+                val progressGroupAfterUpdate = getProgressGroup()
+                if (progressGroupAfterUpdate.first > progressGroupBeforeUpdate.first) {
+                    showAchievementNotification(
+                        "You are making progress on an achievement! You have already reached " +
+                                progressGroupAfterUpdate.second + "% of the next level of the '" +
+                                getName() + "' achievement!",
+                        project
+                    )
+                }
             }
+
+            refreshWindow()
+            CSVReportGenerator.generateCSVReport(project)
         }
 
-        refreshWindow()
-        CSVReportGenerator.generateCSVReport(project)
     }
 
     abstract fun supportsLanguages(): List<Language>
 
     open fun getPropertyKey(): String{
-        println(this::class.simpleName!!)
         return this::class.simpleName!!
     }
 

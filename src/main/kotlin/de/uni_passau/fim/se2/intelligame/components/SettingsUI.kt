@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.ui.AnimatedIcon
 import com.intellij.ui.CheckboxTree
 import com.intellij.ui.CheckboxTreeListener
 import com.intellij.ui.CheckedTreeNode
@@ -78,8 +79,6 @@ class SettingsUI {
 
                     sourceTree.selectionPath = path
 
-                    println(path.lastPathComponent)
-
                     val popup = JPopupMenu()
                     val reloadFromDiskItem = JMenuItem("Reload from disk")
                     reloadFromDiskItem.icon = AllIcons.Actions.Refresh
@@ -108,8 +107,13 @@ class SettingsUI {
             topPanel.add(tree, BorderLayout.NORTH)
 
             val sendDataButton = JButton("Send experiment data")
+            sendDataButton.setHorizontalTextPosition(SwingConstants.LEADING)
             sendDataButton.addActionListener {
-                gamificationService.sendExperimentData(files)
+                sendDataButton.icon = AnimatedIcon.Default()
+
+                gamificationService.sendExperimentData(files) {
+                    sendDataButton.icon = null
+                }
             }
             topPanel.add(sendDataButton, BorderLayout.CENTER)
 
