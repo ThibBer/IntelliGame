@@ -52,15 +52,19 @@ class SettingsUI {
         private val files = ArrayList<File>()
 
         fun create(project: Project): JComponent {
-            files.clear()
-
             val gamificationService = project.service<GamificationService>()
             val settingsPanel = JPanel(BorderLayout())
 
             val topPanel = JPanel(BorderLayout())
             topPanel.border = BorderFactory.createTitledBorder("Dump data")
 
-            val root = getCheckedTree(project)
+            val filesData = getCheckedTree(project)
+            val root = filesData.first
+
+            files.clear()
+            for (file in filesData.second) {
+                files.add(file)
+            }
 
             val checkboxTreeListener = CustomCheckboxTreeListener()
 
@@ -84,7 +88,7 @@ class SettingsUI {
                     reloadFromDiskItem.icon = AllIcons.Actions.Refresh
                     reloadFromDiskItem.addActionListener {
                         tree.removeAll()
-                        tree.model = DefaultTreeModel(getCheckedTree(project))
+                        tree.model = DefaultTreeModel(getCheckedTree(project).first)
                     }
                     popup.add(reloadFromDiskItem)
                     popup.show(sourceTree, x, y)
@@ -159,7 +163,7 @@ class SettingsUI {
             return files
         }
 
-        private fun getCheckedTree(project: Project): CheckedTreeNode{
+        private fun getCheckedTree(project: Project): Pair<CheckedTreeNode, List<File>> {
             val directory = Util.getEvaluationDirectoryPath(project)
             val root = CheckedTreeNode(directory)
 
@@ -171,7 +175,7 @@ class SettingsUI {
                 root.add(checkedTreeNode)
             }
 
-            return root
+            return Pair(root, files)
         }
     }
 }

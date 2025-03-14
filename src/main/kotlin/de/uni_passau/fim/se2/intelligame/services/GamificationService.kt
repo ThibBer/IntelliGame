@@ -299,9 +299,11 @@ class GamificationService(val project: Project) : Disposable {
         }
     }
 
-    fun sendExperimentData(files: List<File>, callback: ((Int) -> Unit)? = null) {
+    fun sendExperimentData(files: List<File>, callback: ((Int?) -> Unit)? = null) {
         if (files.isEmpty()) {
-            return
+            if(callback != null){
+                callback(null)
+            }
         }
 
         val client = httpClient.newBuilder().build()
