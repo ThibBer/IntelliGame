@@ -49,37 +49,27 @@ object RepairXWrongTestsAchievement : SMTRunnerEventsListener, Achievement() {
             ?.removePrefix("java:test://")
             ?.replace(".", "/")
             ?: "")
-        val pathToTest =
-            project?.basePath + "${File.separator}src${File.separator}test${File.separator}java${File.separator}" +
-                    fileUrl + ".java"
-        val pathToCode =
-            project?.basePath + "${File.separator}src${File.separator}main${File.separator}java${File.separator}" +
-                    fileUrl.dropLast(4) + ".java"
+        val pathToTest = project?.basePath + "${File.separator}src${File.separator}test${File.separator}java${File.separator}" + fileUrl + ".java"
+        val pathToCode = project?.basePath + "${File.separator}src${File.separator}main${File.separator}java${File.separator}" + fileUrl.dropLast(4) + ".java"
         val testFile = File(pathToTest)
         val codeFile = File(pathToCode)
+
         if (key != null && testFile.exists() && codeFile.exists()) {
-            val testFileContent = FileUtils.readFileToString(testFile, Charset.defaultCharset())
-                .replace(System.lineSeparator(), "")
-            val codeFileContent = FileUtils.readFileToString(codeFile, Charset.defaultCharset())
-                .replace(System.lineSeparator(), "")
-            if (test.magnitudeInfo == TestStateInfo.Magnitude.FAILED_INDEX) {
-                if (!testsUnderObservation.containsKey(key) && !classesUnderObservation.containsKey(key)) {
-                    testsUnderObservation[key] = testFileContent
-                    classesUnderObservation[key] = codeFileContent
-                }
+            val testFileContent = FileUtils.readFileToString(testFile, Charset.defaultCharset()).replace(System.lineSeparator(), "")
+            val codeFileContent = FileUtils.readFileToString(codeFile, Charset.defaultCharset()).replace(System.lineSeparator(), "")
+
+            if (test.magnitudeInfo == TestStateInfo.Magnitude.FAILED_INDEX && !testsUnderObservation.containsKey(key) && !classesUnderObservation.containsKey(key)) {
+                testsUnderObservation[key] = testFileContent
+                classesUnderObservation[key] = codeFileContent
             } else if (test.magnitudeInfo == TestStateInfo.Magnitude.PASSED_INDEX) {
-                if (testsUnderObservation.containsKey(key) && classesUnderObservation.containsKey(key) &&
-                    testsUnderObservation[key] != testFileContent && classesUnderObservation[key] == codeFileContent
-                ) {
+                if (testsUnderObservation.containsKey(key) && classesUnderObservation.containsKey(key) && testsUnderObservation[key] != testFileContent && classesUnderObservation[key] == codeFileContent) {
                     var progress = progress()
                     progress += 1
                     handleProgress(progress, project)
-                    testsUnderObservation.remove(key)
-                    classesUnderObservation.remove(key)
-                } else {
-                    testsUnderObservation.remove(key)
-                    classesUnderObservation.remove(key)
                 }
+
+                testsUnderObservation.remove(key)
+                classesUnderObservation.remove(key)
             }
         }
     }
