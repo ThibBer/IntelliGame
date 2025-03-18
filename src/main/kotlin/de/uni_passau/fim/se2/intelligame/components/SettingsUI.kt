@@ -4,11 +4,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.ui.AnimatedIcon
-import com.intellij.ui.CheckboxTree
-import com.intellij.ui.CheckboxTreeListener
-import com.intellij.ui.CheckedTreeNode
-import com.intellij.ui.SimpleTextAttributes
+import com.intellij.ui.*
 import de.uni_passau.fim.se2.intelligame.services.GamificationService
 import de.uni_passau.fim.se2.intelligame.util.Util
 import java.awt.BorderLayout
@@ -119,6 +115,8 @@ class SettingsUI {
                     sendDataButton.icon = null
                 }
             }
+            sendDataButton.isEnabled = files.isNotEmpty()
+
             topPanel.add(sendDataButton, BorderLayout.CENTER)
 
             checkboxTreeListener.nodeStateChanged = OnNodeStateChanged {
