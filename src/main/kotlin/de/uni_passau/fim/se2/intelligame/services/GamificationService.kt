@@ -291,6 +291,7 @@ class GamificationService(val project: Project) : Disposable {
         properties.unsetValue("gamification-username")
         properties.unsetValue("gamification-api-key")
 
+        properties.unsetValue("gamification-user-id")
         properties.setValue("gamification-user-id", UUID.randomUUID().toString())
 
         for(achievement in Util.getAchievements()){
