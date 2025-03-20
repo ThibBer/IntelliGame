@@ -146,6 +146,8 @@ abstract class Achievement {
         val pointsToAdd = progress - progress()
         gamificationService.addPoints(pointsToAdd, this::class)
 
+        println("GameMode : " + gamificationService.getGameMode())
+
         if(gamificationService.getGameMode() == GameMode.ACHIEVEMENTS){
             if (progress >= nextStep()) {
                 updateProgress(progress)

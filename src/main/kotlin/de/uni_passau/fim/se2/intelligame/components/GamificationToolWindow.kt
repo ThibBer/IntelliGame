@@ -63,10 +63,11 @@ class GamificationToolWindow : ToolWindowFactory {
             tabbedPane.addTab("Achievements", achievements)
 
             tabbedPane.addChangeListener {
-                properties.setValue("gamification-active-tabs", tabbedPane.selectedIndex.toString())
+                val tabIndex = tabbedPane.selectedIndex
+                properties.setValue("gamification-active-tabs", tabIndex.toString())
 
-                if(GameMode.entries.count() < tabbedPane.selectedIndex){
-                    gamificationService.setGameMode(GameMode.entries[tabbedPane.selectedIndex])
+                if(tabIndex == GameMode.LEADERBOARD.ordinal || tabIndex == GameMode.ACHIEVEMENTS.ordinal) {
+                    gamificationService.setGameMode(GameMode.entries[tabIndex])
                 }
             }
 
