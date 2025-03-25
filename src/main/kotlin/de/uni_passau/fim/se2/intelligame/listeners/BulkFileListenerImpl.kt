@@ -64,8 +64,9 @@ object BulkFileListenerImpl : BulkFileListener {
                     for (refactoring in refactorings) {
                         when (refactoring) {
                             is RenameOperationRefactoring -> {
-                                if (!refactoring.renamedOperation.name.contains("\\d".toRegex()))
-                                RefactorXTestNamesAchievement.triggerAchievement(project)
+                                if (!refactoring.renamedOperation.name.contains("\\d".toRegex())) {
+                                    RefactorXTestNamesAchievement.triggerAchievement(project)
+                                }
                             }
                             is ExtractOperationRefactoring -> {
                                 RefactorExtractXMethodsAchievement.triggerAchievement(project)
