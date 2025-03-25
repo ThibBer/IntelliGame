@@ -29,6 +29,9 @@ import de.uni_passau.fim.se2.intelligame.command.*
 import de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow
 import de.uni_passau.fim.se2.intelligame.leaderboard.Leaderboard
 import de.uni_passau.fim.se2.intelligame.util.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -57,6 +60,8 @@ class GamificationService(val project: Project) : Disposable {
     private var webSocketUrl = MyBundle.getMessage("websocketURL")
     private var apiUrl = MyBundle.getMessage("apiURL")
 
+    private val heartbeatInterval = MyBundle.getMessage("heartbeatInterval", "30000").toLong()
+
     private val webSocketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             super.onOpen(webSocket, response)
@@ -72,6 +77,10 @@ class GamificationService(val project: Project) : Disposable {
                     )
                 )
             )
+
+            GlobalScope.launch {
+                webSocketHeartbeat()
+            }
 
             Logger.logStatus("Websocket connection opened", Logger.Kind.Debug, project)
         }
@@ -118,6 +127,13 @@ class GamificationService(val project: Project) : Disposable {
         apiKey = getPropertyValue("gamification-api-key", "")
 
         connect()
+    }
+
+    private suspend fun webSocketHeartbeat() {
+        while (webSocketState == WebSocketState.CONNECTED) {
+            webSocketClient.send("heartbeat")
+            delay(heartbeatInterval)
+        }
     }
 
     private fun getPropertyValue(key: String, defaultValue: String): String {
