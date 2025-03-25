@@ -3,8 +3,8 @@
 import com.intellij.openapi.project.Project
 import com.intellij.ui.JBColor.isBright
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.AlignX
-import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
 import de.uni_passau.fim.se2.intelligame.util.AchievementCategoryType
 import de.uni_passau.fim.se2.intelligame.util.Util
@@ -23,6 +23,14 @@ class AchievementsUI {
             AchievementCategory(AchievementCategoryType.COVERAGE_ADVANCED, Util.getAdvancedCoverageAchievements()),
             AchievementCategory(AchievementCategoryType.DEBUGGING, Util.getDebuggingAchievements()),
             AchievementCategory(AchievementCategoryType.TEST_REFACTORING, Util.getRefactoringAchievements()),
+        )
+
+        private val trophies: List<Pair<Icon, String>> = listOf(
+            Pair(TrophyIcons.trophyDefaultIcon, "None"),
+            Pair(TrophyIcons.trophyBronzeIcon, "Bronze"),
+            Pair(if (isBright()) TrophyIcons.trophySilverLightIcon else TrophyIcons.trophySilverIcon, "Silver"),
+            Pair(TrophyIcons.trophyGoldIcon, "Gold"),
+            Pair(TrophyIcons.trophyPlatinIcon, "Platinum"),
         )
 
         fun create(project: Project): JPanel {
@@ -44,6 +52,17 @@ class AchievementsUI {
 
         private fun achievementList(): JPanel {
             val panel = panel {
+                row("Available trophies") {
+                    label("").resizableColumn()
+                    for(trophy in trophies){
+                        panel{
+                            row { icon(trophy.first).align(Align.CENTER) }
+                            row { label(trophy.second).align(Align.CENTER) }
+                        }
+                    }
+                    label("").resizableColumn()
+                }
+
                 for(category in categories) {
                     groupRowsRange(category.label.toString()) {
                         for (achievement in category.achievements) {
@@ -64,7 +83,7 @@ class AchievementsUI {
                                 }
 
                                 label(label)
-                            }.layout(RowLayout.PARENT_GRID)
+                            }.resizableRow()
                         }
                     }
                 }
