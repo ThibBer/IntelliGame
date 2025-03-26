@@ -132,7 +132,7 @@ object Util {
     }
 
     fun getEvaluationDirectoryPath(project: Project): String{
-        return ProjectRootManager.getInstance(project).contentRoots[0].path + "${File.separator}.evaluation${File.separator}"
+        return ProjectRootManager.getInstance(project).contentRoots.last().path + "${File.separator}.evaluation${File.separator}"
     }
 
     fun getEvaluationFilePath(project: Project, filename: String): String{
