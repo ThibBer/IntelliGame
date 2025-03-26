@@ -88,7 +88,8 @@ class LeaderboardUI {
             searchPanel.border = JBEmptyBorder(0, 0, 10, 0)
             searchPanel.layout = BoxLayout(searchPanel, BoxLayout.LINE_AXIS)
 
-            val searchTextField = SearchTextField()
+            val searchTextField = SearchTextField(true, true, "Test name")
+            searchTextField.textEditor.emptyText.text = "Username"
             searchTextField.text = searchInputText
 
             searchPanel.add(searchTextField)
@@ -128,6 +129,7 @@ class LeaderboardUI {
                     return component
                 }
             }
+
             for (i in 0 until usersTable.columnCount) {
                 usersTable.columnModel.getColumn(i).cellRenderer = boldRenderer
             }
