@@ -290,6 +290,10 @@ class GamificationService(val project: Project) : Disposable {
     }
 
     fun setGameMode(gameMode: GameMode) {
+        if(this.gameMode != gameMode){
+            showNotification("Game mode selected : ${gameMode.name.lowercase()}")
+        }
+
         this.gameMode = gameMode
         properties.setValue("gamification-game-mode", gameMode.name)
     }
