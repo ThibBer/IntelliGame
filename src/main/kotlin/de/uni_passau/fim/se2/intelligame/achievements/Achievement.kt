@@ -168,7 +168,7 @@ abstract class Achievement {
             }
 
             refreshWindow()
-            CSVReportGenerator.generateCSVReport(project)
+            CSVReportGenerator.generateCSVReport(project, "Achievements.csv")
         }
 
     }

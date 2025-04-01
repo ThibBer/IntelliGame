@@ -12,6 +12,8 @@ class CSVFile(private val headers: List<String>) {
     fun save(path: String) {
         val file = File(path)
 
+        file.parentFile?.mkdirs()
+
         if(!file.exists()) {
             val data = headers.joinToString(",") + "\n" + content
             file.writeText(data)

@@ -337,16 +337,19 @@ class GamificationService(val project: Project) : Disposable {
             )
         }
 
+        val url = "${apiUrl}/experimentData"
         val requestBody = bodyBuilder.build()
         val request = Request.Builder()
-            .url("${apiUrl}/experimentData")
+            .url(url)
             .post(requestBody)
             .addHeader("content-type", "multipart/form-data")
             .addHeader("API-KEY", apiKey)
             .build()
 
-        println("POST ${files.size} files to ${apiUrl}/experimentData -  :")
-        files.forEach { println("- ${it.name} (${it.length()} bytes)") }
+        val stringBuilder = StringBuilder("POST ${files.size} files to $url :")
+        files.forEach { stringBuilder.appendLine("- ${it.name} (${it.length()} bytes)") }
+
+        Logger.logStatus(stringBuilder.toString(), Logger.Kind.Debug, project)
 
         client.newCall(request).execute().use { response ->
             if(response.code == 200) {

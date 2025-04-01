@@ -17,7 +17,6 @@
 package de.uni_passau.fim.se2.intelligame.util
 
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -25,25 +24,28 @@ import java.io.Writer
 import java.sql.Timestamp
 
 object Logger {
+    private const val LOG_FILE_NAME = "EvaluationLogs.txt"
 
     enum class Kind {
         Notification, Main, Debug, Error
     }
 
     fun logStatus(text: String, kind: Kind, project: Project?) {
-
-        if (project != null) {
-            try {
-                val path = ProjectRootManager.getInstance(project).contentRoots[0].path + "${File.separator}.evaluation${File.separator}evaluationLogs.txt"
-                val output: Writer = BufferedWriter(FileWriter(File(path), true))
-
-                val timestamp = Timestamp(System.currentTimeMillis()).toString()
-                val data = "$timestamp - ${kind.name} - $text"
-                output.appendLine(data)
-                output.close()
-
-                println(data)
-            } catch (_: Exception) {}
+        if (project == null) {
+            println("LOGGER - Invalid project : (${kind.name}) - $text")
+            return
         }
+
+        try {
+            val path = project.basePath + "${File.separator}.evaluation${File.separator}$LOG_FILE_NAME"
+            val output: Writer = BufferedWriter(FileWriter(File(path), true))
+
+            val timestamp = Timestamp(System.currentTimeMillis()).toString()
+            val data = "$timestamp - ${kind.name} - $text"
+            output.appendLine(data)
+            output.close()
+
+            println(data)
+        } catch (_: Exception) {}
     }
 }

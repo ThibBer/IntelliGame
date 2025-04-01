@@ -30,7 +30,7 @@ import java.util.stream.Collectors
 
 object CSVReportGenerator {
 
-    fun generateCSVReport(project: Project?) {
+    fun generateCSVReport(project: Project?, fileName: String) {
         if (project == null) {
             return
         }
@@ -45,7 +45,8 @@ object CSVReportGenerator {
 
         try {
             val path = Util.getEvaluationDirectoryPath(project)
-            val printer = getNewPrinter("TestReport.csv", path, headers)
+            File(path).mkdirs()
+            val printer = getNewPrinter(fileName, path, headers)
             val timestamp = Timestamp(System.currentTimeMillis()).toString()
             val row = mutableListOf<String>()
 
