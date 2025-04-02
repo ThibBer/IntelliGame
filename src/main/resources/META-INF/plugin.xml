@@ -1,5 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin url="https://github.com/ThibBer/IntelliGame">
+<idea-plugin url="https://github.com/ThibBer/IntelliGame" allow-bundled-update="true">
     <id>de.uni_passau.fim.se2.intelligame</id>
     <name>IntelliGame</name>
     <vendor url="https://www.fim.uni-passau.de/en/chair-for-software-engineering-ii">Chair for Software Engineering II</vendor>
@@ -17,13 +17,21 @@
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.java</depends>
 
+    <resource-bundle>messages.MyBundle</resource-bundle>
+
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="de.uni_passau.fim.se2.intelligame.services.GamificationService"/>
-        <projectService serviceImplementation="de.uni_passau.fim.se2.intelligame.services.ProjectService"/>
+        <toolWindow
+            id="Gamification"
+            icon="de.uni_passau.fim.se2.intelligame.components.TrophyIcons.trophyDefaultIcon"
+            factoryClass="de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow"
+        />
+
         <notificationGroup id="Gamification" displayType="BALLOON"/>
-        <!-- Change the id to something else (e.g. Personal ID) for the control group and change the group MyBundle.properties -->
-        <toolWindow factoryClass="de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow" id="Gamification"/>
-        <postStartupActivity implementation="de.uni_passau.fim.se2.intelligame.listeners.ProjectActivity" />
-        <editorNotificationProvider implementation="de.uni_passau.fim.se2.intelligame.components.WebSocketNotConnectedNotificationProvider"/>
+
+        <editorNotificationProvider id="WebSocketNotConnectedNotificationProvider" implementation="de.uni_passau.fim.se2.intelligame.components.WebSocketNotConnectedNotificationProvider" />
     </extensions>
+
+    <applicationListeners>
+        <listener class="de.uni_passau.fim.se2.intelligame.listeners.CoverageListener" topic="com.intellij.coverage.CoverageSuiteListener"/>
+    </applicationListeners>
 </idea-plugin>

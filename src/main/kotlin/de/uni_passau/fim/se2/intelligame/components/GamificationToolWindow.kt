@@ -16,79 +16,22 @@
 
 package de.uni_passau.fim.se2.intelligame.components
 
-import com.intellij.ide.DataManager
-import com.intellij.ide.util.PropertiesComponent
-import com.intellij.openapi.actionSystem.PlatformDataKeys
-import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
-import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.ui.components.JBTabbedPane
 import com.intellij.ui.content.ContentFactory
-import de.uni_passau.fim.se2.intelligame.services.GamificationService
-import de.uni_passau.fim.se2.intelligame.util.GameMode
-import java.util.concurrent.TimeUnit
-import javax.swing.JComponent
-import javax.swing.SwingUtilities
-
 
 class GamificationToolWindow : ToolWindowFactory {
-    private val contentFactory = ContentFactory.getInstance()
-
-    override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val panel = createPanel(project)
-        val content = contentFactory.createContent(panel, null, false)
-
-        toolWindow.setIcon(TrophyIcons.trophyToolWindowIcon)
-        toolWindow.contentManager.addContent(content)
+    init {
+        thisLogger().debug("GamificationToolWindow")
     }
 
-    companion object {
-        private val properties = PropertiesComponent.getInstance()
+    override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        val panel = WindowPanel(project).create()
 
-        fun createPanel(project: Project): JComponent {
-            val gamificationService = project.service<GamificationService>()
-
-            if(properties.getValue("gamification-api-key").isNullOrBlank()) {
-                return ApiSettingsUI.create(project)
-            }
-
-            val tabbedPane = JBTabbedPane()
-
-            val leaderboard = LeaderboardUI.create(project)
-            tabbedPane.addTab("Leaderboard", leaderboard)
-
-            val achievements = AchievementsUI.create(project)
-            tabbedPane.addTab("Achievements", achievements)
-
-            tabbedPane.addChangeListener {
-                val tabIndex = tabbedPane.selectedIndex
-                properties.setValue("gamification-active-tabs", tabIndex.toString())
-
-                if(tabIndex == GameMode.LEADERBOARD.ordinal || tabIndex == GameMode.ACHIEVEMENTS.ordinal) {
-                    gamificationService.setGameMode(GameMode.entries[tabIndex])
-                }
-            }
-
-            val settings = SettingsUI.create(project)
-            tabbedPane.addTab("Settings", settings)
-
-            tabbedPane.selectedIndex = properties.getValue("gamification-active-tabs", "0").toInt()
-
-            return tabbedPane
-        }
-
-        fun refresh() {
-            val project = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)
-            val toolWindow = ToolWindowManager.getInstance(project!!).getToolWindow("Gamification")!!
-
-            SwingUtilities.invokeLater {
-                toolWindow.contentManager.removeAllContents(true)
-                val content = ContentFactory.getInstance().createContent(createPanel(project), null, false)
-                toolWindow.contentManager.addContent(content)
-            }
-        }
+        val content = ContentFactory.getInstance().createContent(panel, null, false)
+        toolWindow.contentManager.addContent(content)
     }
 
     override fun shouldBeAvailable(project: Project) = true

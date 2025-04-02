@@ -16,10 +16,11 @@
 
 package de.uni_passau.fim.se2.intelligame.services
 
-import com.intellij.coverage.CoverageDataManagerImpl
 import com.intellij.execution.ExecutionManager
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.xdebugger.XDebuggerManager
@@ -27,13 +28,11 @@ import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import de.uni_passau.fim.se2.intelligame.achievements.*
 import de.uni_passau.fim.se2.intelligame.listeners.BulkFileListenerImpl
 import de.uni_passau.fim.se2.intelligame.listeners.ConsoleListener
-import de.uni_passau.fim.se2.intelligame.listeners.CoverageListener
 
-
-class ProjectService(project: Project): Disposable {
-
+@Service(Service.Level.PROJECT)
+class ProjectService(val project: Project) : Disposable {
     init {
-        println("Project service")
+        thisLogger().debug("Project service executed")
 
         project.messageBus.connect().subscribe(SMTRunnerEventsListener.TEST_STATUS, TriggerXAssertsByTestsAchievement)
         project.messageBus.connect().subscribe(XDebuggerManager.TOPIC, RunXDebuggerModeAchievement)
@@ -52,8 +51,6 @@ class ProjectService(project: Project): Disposable {
         project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, AddTestsAchievement)
         project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, BulkFileListenerImpl)
         project.messageBus.connect().subscribe(ExecutionManager.EXECUTION_TOPIC, ConsoleListener)
-
-        CoverageDataManagerImpl.getInstance(project)?.addSuiteListener(CoverageListener, this)
     }
 
     override fun dispose() = Unit

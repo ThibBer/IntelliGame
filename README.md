@@ -43,4 +43,10 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 [template]: https://github.com/JetBrains/intellij-platform-plugin-template
 
 <!-- Plugin description -->
+A gamified plugin which rewards developers for positive testing behavior using a multi-level achievement system. It supports the following types of achievements for Java and JavaScript:
+
+- Testing
+- Coverage
+- Debugging
+- Test Refactoring
 <!-- Plugin description end -->

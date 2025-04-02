@@ -16,16 +16,18 @@
 
 package de.uni_passau.fim.se2.intelligame.listeners
 
+import com.intellij.coverage.CoverageDataManager
+import com.intellij.coverage.CoverageSuite
+import com.intellij.coverage.CoverageSuiteListener
+import com.intellij.coverage.CoverageSuitesBundle
 import de.uni_passau.fim.se2.intelligame.achievements.*
 import de.uni_passau.fim.se2.intelligame.util.CoverageInfo
-import com.intellij.coverage.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import java.lang.reflect.Field
-
 
 object CoverageListener : CoverageSuiteListener {
     lateinit var project: Project
@@ -38,7 +40,7 @@ object CoverageListener : CoverageSuiteListener {
     override fun beforeSuiteChosen() = Unit
 
     override fun afterSuiteChosen() {
-        val dataManager = CoverageDataManagerImpl.getInstance(project)
+        val dataManager = CoverageDataManager.getInstance(project)
         if (ApplicationManager.getApplication().isUnitTestMode) {
             return
         }
@@ -59,11 +61,9 @@ object CoverageListener : CoverageSuiteListener {
 
                 fun javaCoverage() {
                     // Check for class coverage information
-                    val classCoverageInfosField: Field =
-                        annotator.javaClass.getDeclaredField("myClassCoverageInfos")
+                    val classCoverageInfosField: Field = annotator.javaClass.getDeclaredField("myClassCoverageInfos")
                     classCoverageInfosField.isAccessible = true
-                    val classCoverageInfosValue: Map<Any, Any> =
-                        classCoverageInfosField.get(annotator) as Map<Any, Any>
+                    val classCoverageInfosValue: Map<Any, Any> = classCoverageInfosField.get(annotator) as Map<Any, Any>
                     for ((key, value) in classCoverageInfosValue) {
                         val coverageInfo = extractCoverageInfos(value)
                         GetXLineCoverageInClassesWithYLinesAchievement.triggerAchievement(
@@ -86,11 +86,9 @@ object CoverageListener : CoverageSuiteListener {
                         CoverXClassesAchievement.triggerAchievement(coverageInfo, project)
                         CoverXBranchesAchievement.triggerAchievement(coverageInfo, project)
                     }
-                    val extensionCoverageField: Field =
-                        annotator.javaClass.getDeclaredField("myDirCoverageInfos")
+                    val extensionCoverageField: Field = annotator.javaClass.getDeclaredField("myDirCoverageInfos")
                     extensionCoverageField.isAccessible = true
-                    val extensionCoverageInfosValue: Map<Any, Any> =
-                        extensionCoverageField.get(annotator) as Map<Any, Any>
+                    val extensionCoverageInfosValue: Map<Any, Any> = extensionCoverageField.get(annotator) as Map<Any, Any>
                     if (extensionCoverageInfosValue.isEmpty()) {
                         ApplicationManager.getApplication().invokeLater(fun() {
                             ProgressManager.getInstance().run(this)

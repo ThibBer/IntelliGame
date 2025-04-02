@@ -24,21 +24,29 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
-import de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow
+import com.intellij.ui.content.ContentFactory
+import de.uni_passau.fim.se2.intelligame.components.WindowPanel
 import de.uni_passau.fim.se2.intelligame.services.GamificationService
 import de.uni_passau.fim.se2.intelligame.util.CSVReportGenerator
 import de.uni_passau.fim.se2.intelligame.util.GameMode
 import de.uni_passau.fim.se2.intelligame.util.Logger
 import java.util.concurrent.TimeUnit
+import javax.swing.SwingUtilities
 
 abstract class Achievement {
     enum class Language {
         Java, JavaScript
     }
 
-    companion object {
-        fun refreshWindow() {
-            GamificationToolWindow.refresh()
+    protected fun refreshWindow(){
+        val project = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)
+        val toolWindow = ToolWindowManager.getInstance(project!!).getToolWindow("Gamification")!!
+
+        SwingUtilities.invokeLater {
+            toolWindow.contentManager.removeAllContents(true)
+            val panel = WindowPanel(project).create()
+            val content = ContentFactory.getInstance().createContent(panel, null, false)
+            toolWindow.contentManager.addContent(content)
         }
     }
 
