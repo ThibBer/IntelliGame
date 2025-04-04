@@ -5,9 +5,10 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 plugins {
     id("java") // Java support
-    id("org.jetbrains.kotlin.jvm") version "2.1.20"
-    id("org.jetbrains.intellij.platform") version "2.5.0"
-    id("org.jetbrains.changelog") version "2.2.1"
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.intelliJPlatform)
+    alias(libs.plugins.changelog)
+    alias(libs.plugins.kover)
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -24,36 +25,6 @@ repositories {
     intellijPlatform {
         defaultRepositories()
     }
-}
-
-dependencies {
-    intellijPlatform {
-        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
-
-        // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.providers.gradleProperty file for bundled IntelliJ Platform plugins.
-        bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
-
-        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.providers.gradleProperty file for plugin from JetBrains Marketplace.
-        plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
-
-        pluginVerifier()
-        zipSigner()
-        testFramework(TestFrameworkType.Platform)
-    }
-
-    implementation("org.apache.commons:commons-text:1.10.0")
-    implementation("io.github.java-diff-utils:java-diff-utils:4.12")
-    implementation("com.github.tsantalis:refactoring-miner:2.2.0")
-    implementation("org.apache.commons:commons-csv:1.10.0")
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
-    implementation("com.google.code.gson:gson:2.12.1")
-
-    testImplementation("junit:junit:4.13.2")
-}
-
-configurations.all {
-    exclude(group = "org.slf4j", module = "slf4j-log4j12")
-    exclude(group = "org.slf4j", module = "slf4j-api")
 }
 
 intellijPlatform {
@@ -120,6 +91,36 @@ intellijPlatform {
             )
         )
     }
+}
+
+dependencies {
+    intellijPlatform {
+        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
+
+        // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.providers.gradleProperty file for bundled IntelliJ Platform plugins.
+        bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+
+        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.providers.gradleProperty file for plugin from JetBrains Marketplace.
+        plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
+
+        pluginVerifier()
+        zipSigner()
+        testFramework(TestFrameworkType.Platform)
+    }
+
+    implementation("org.apache.commons:commons-text:1.10.0")
+    implementation("io.github.java-diff-utils:java-diff-utils:4.12")
+    implementation("com.github.tsantalis:refactoring-miner:2.2.0")
+    implementation("org.apache.commons:commons-csv:1.10.0")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
+    implementation("com.google.code.gson:gson:2.12.1")
+
+    testImplementation(libs.junit)
+}
+
+configurations.all {
+    exclude(group = "org.slf4j", module = "slf4j-log4j12")
+    exclude(group = "org.slf4j", module = "slf4j-api")
 }
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin

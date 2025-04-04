@@ -1,5 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin url="https://github.com/ThibBer/IntelliGame" allow-bundled-update="true">
+<idea-plugin url="https://github.com/ThibBer/IntelliGame">
     <id>de.uni_passau.fim.se2.intelligame</id>
     <name>IntelliGame</name>
     <vendor url="https://www.fim.uni-passau.de/en/chair-for-software-engineering-ii">Chair for Software Engineering II</vendor>
@@ -22,16 +22,14 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow
             id="Gamification"
-            icon="de.uni_passau.fim.se2.intelligame.components.TrophyIcons.trophyDefaultIcon"
+            icon="de.uni_passau.fim.se2.intelligame.components.TrophyIcons.trophyToolWindowIcon"
             factoryClass="de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow"
         />
 
-        <notificationGroup id="Gamification" displayType="BALLOON"/>
+        <postStartupActivity implementation="de.uni_passau.fim.se2.intelligame.listeners.ProjectActivity"/>
 
+        <notificationGroup id="Gamification" displayType="BALLOON"/>
+        <testStatusListener implementation="de.uni_passau.fim.se2.intelligame.listeners.KoverageListener"/>
         <editorNotificationProvider id="WebSocketNotConnectedNotificationProvider" implementation="de.uni_passau.fim.se2.intelligame.components.WebSocketNotConnectedNotificationProvider" />
     </extensions>
-
-    <applicationListeners>
-        <listener class="de.uni_passau.fim.se2.intelligame.listeners.CoverageListener" topic="com.intellij.coverage.CoverageSuiteListener"/>
-    </applicationListeners>
 </idea-plugin>

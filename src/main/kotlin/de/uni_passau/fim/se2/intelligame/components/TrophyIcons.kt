@@ -21,6 +21,7 @@ import com.intellij.openapi.util.IconLoader
 object TrophyIcons {
     @JvmField
     val trophyDefaultIcon = IconLoader.getIcon("/icons/trophy-variant-outline.svg", javaClass)
+    @JvmField
     val trophyToolWindowIcon = IconLoader.getIcon("/icons/trophy-tool-window.svg", javaClass)
     val trophyBronzeIcon = IconLoader.getIcon("/icons/trophy-bronze.svg", javaClass)
     val trophySilverIcon = IconLoader.getIcon("/icons/trophy-silver.svg", javaClass)

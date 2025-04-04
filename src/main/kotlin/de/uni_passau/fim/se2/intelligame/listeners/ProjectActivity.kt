@@ -8,7 +8,7 @@ import de.uni_passau.fim.se2.intelligame.services.ProjectService
 
 class ProjectActivity: ProjectActivity {
     override suspend fun execute(project: Project) {
-//        project.service<ProjectService>()
-//        project.service<GamificationService>()
+        project.service<ProjectService>()
+        project.service<GamificationService>()
     }
 }

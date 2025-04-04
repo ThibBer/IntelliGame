@@ -24,6 +24,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.EditorNotifications
@@ -34,7 +35,9 @@ import de.uni_passau.fim.se2.intelligame.command.*
 import de.uni_passau.fim.se2.intelligame.components.WindowPanel
 import de.uni_passau.fim.se2.intelligame.leaderboard.Leaderboard
 import de.uni_passau.fim.se2.intelligame.util.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -82,9 +85,9 @@ class GamificationService(val project: Project) : Disposable {
                 )
             )
 
-            /*GlobalScope.launch {
+            GlobalScope.launch {
                 webSocketHeartbeat()
-            }*/
+            }
 
             Logger.logStatus("Websocket connection opened", Logger.Kind.Debug, project)
         }
@@ -135,7 +138,12 @@ class GamificationService(val project: Project) : Disposable {
 
     private fun refresh(){
         val project = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)
-        val toolWindowManager = ToolWindowManager.getInstance(project!!)
+        if(project == null){
+            thisLogger().error("Project is null, cannot refresh the window")
+            return
+        }
+
+        val toolWindowManager = ToolWindowManager.getInstance(project)
         val toolWindow = toolWindowManager.getToolWindow("Gamification")!!
 
         toolWindowManager.invokeLater {

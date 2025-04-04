@@ -20,7 +20,6 @@ import com.intellij.execution.ExecutionManager
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.xdebugger.XDebuggerManager
@@ -32,7 +31,7 @@ import de.uni_passau.fim.se2.intelligame.listeners.ConsoleListener
 @Service(Service.Level.PROJECT)
 class ProjectService(val project: Project) : Disposable {
     init {
-        thisLogger().debug("Project service executed")
+        println("Project service")
 
         project.messageBus.connect().subscribe(SMTRunnerEventsListener.TEST_STATUS, TriggerXAssertsByTestsAchievement)
         project.messageBus.connect().subscribe(XDebuggerManager.TOPIC, RunXDebuggerModeAchievement)
