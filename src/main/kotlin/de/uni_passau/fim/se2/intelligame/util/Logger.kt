@@ -17,7 +17,6 @@
 package de.uni_passau.fim.se2.intelligame.util
 
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -25,6 +24,7 @@ import java.io.Writer
 import java.sql.Timestamp
 
 object Logger {
+    private const val FILE_NAME = "EvaluationLogs.txt"
 
     enum class Kind {
         Notification, Main, Debug, Error
@@ -34,7 +34,7 @@ object Logger {
 
         if (project != null) {
             try {
-                val path = ProjectRootManager.getInstance(project).contentRoots[0].path + "${File.separator}.evaluation${File.separator}evaluationLogs.txt"
+                val path = Util.getEvaluationFilePath(project, FILE_NAME)
                 val output: Writer = BufferedWriter(FileWriter(File(path), true))
 
                 val timestamp = Timestamp(System.currentTimeMillis()).toString()

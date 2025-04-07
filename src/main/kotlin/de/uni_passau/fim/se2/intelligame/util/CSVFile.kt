@@ -13,6 +13,8 @@ class CSVFile(private val headers: List<String>) {
         val file = File(path)
 
         if(!file.exists()) {
+            file.parentFile.mkdirs()
+
             val data = headers.joinToString(",") + "\n" + content
             file.writeText(data)
         }else{

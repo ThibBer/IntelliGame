@@ -4,7 +4,7 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 plugins {
-    id("java") // Java support
+    id("java")
     alias(libs.plugins.kotlin)
     alias(libs.plugins.intelliJPlatform)
     alias(libs.plugins.changelog)
@@ -113,10 +113,9 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
     }
 
-    implementation("org.apache.commons:commons-text:1.10.0")
-    implementation("io.github.java-diff-utils:java-diff-utils:4.12")
-    implementation("org.apache.commons:commons-csv:1.10.0")
-    implementation("com.github.tsantalis:refactoring-miner:2.2.0")
+    implementation(libs.commonsText)
+    implementation(libs.javaDiff)
+    implementation(libs.refactoringMiner)
     implementation(libs.okhttp)
     implementation(libs.gson)
 
