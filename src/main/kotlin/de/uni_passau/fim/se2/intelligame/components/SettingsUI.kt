@@ -1,10 +1,13 @@
 ﻿package de.uni_passau.fim.se2.intelligame.components
 
 import com.intellij.icons.AllIcons
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.*
+import com.intellij.ui.components.JBTextField
+import com.intellij.util.ui.JBEmptyBorder
 import de.uni_passau.fim.se2.intelligame.services.GamificationService
 import de.uni_passau.fim.se2.intelligame.util.Util
 import java.awt.BorderLayout
@@ -44,15 +47,36 @@ class CustomCheckboxTreeListener : CheckboxTreeListener {
 }
 
 class SettingsUI {
+
     companion object{
         private val files = ArrayList<File>()
 
         fun create(project: Project): JComponent {
+            val properties = PropertiesComponent.getInstance()
+
             val gamificationService = project.service<GamificationService>()
             val settingsPanel = JPanel(BorderLayout())
 
-            val topPanel = JPanel(BorderLayout())
-            topPanel.border = BorderFactory.createTitledBorder("Dump data")
+            val topPanel = JPanel()
+            topPanel.layout = BoxLayout(topPanel, BoxLayout.PAGE_AXIS)
+
+            val myIdPanel = JPanel()
+            myIdPanel.border = JBEmptyBorder(0, 0, 10, 0)
+            myIdPanel.layout = BoxLayout(myIdPanel, BoxLayout.LINE_AXIS)
+
+            val myIdLabel = JLabel("My id :")
+            myIdLabel.border = JBEmptyBorder(0, 0, 0, 10)
+            myIdPanel.add(myIdLabel)
+
+            val textField = JBTextField()
+            textField.text = properties.getValue("gamification-user-id")
+            textField.isEditable = false
+            myIdPanel.add(textField)
+
+            topPanel.add(myIdPanel)
+
+            val dumpDataPanel = JPanel(BorderLayout())
+            dumpDataPanel.border = BorderFactory.createTitledBorder("Dump data")
 
             val filesData = getCheckedTree(project)
             val root = filesData.first
@@ -104,7 +128,7 @@ class SettingsUI {
             }
             tree.addMouseListener(mouseAdapter)
 
-            topPanel.add(tree, BorderLayout.NORTH)
+            dumpDataPanel.add(tree, BorderLayout.NORTH)
 
             val sendDataButton = JButton("Send experiment data")
             sendDataButton.setHorizontalTextPosition(SwingConstants.LEADING)
@@ -115,9 +139,10 @@ class SettingsUI {
                     sendDataButton.icon = null
                 }
             }
+
             sendDataButton.isEnabled = files.isNotEmpty()
 
-            topPanel.add(sendDataButton, BorderLayout.CENTER)
+            dumpDataPanel.add(sendDataButton, BorderLayout.CENTER)
 
             checkboxTreeListener.nodeStateChanged = OnNodeStateChanged {
                 if(it.userObject is File) {
@@ -133,6 +158,7 @@ class SettingsUI {
                 }
             }
 
+            topPanel.add(dumpDataPanel)
             settingsPanel.add(topPanel, BorderLayout.NORTH)
 
             val resetSettingsButton = JButton("Reset plugin settings")

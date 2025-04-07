@@ -18,7 +18,6 @@ package de.uni_passau.fim.se2.intelligame.achievements
 
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
-import com.intellij.execution.testframework.sm.runner.states.TestStateInfo
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.readText
@@ -29,6 +28,9 @@ import javax.swing.SwingUtilities
 object FindXBugsAchievement : SMTRunnerEventsListener, Achievement() {
     private var testsUnderObservation = hashMapOf<String, String>()
     private var project: Project? = null
+    private var FAILED_INDEX = 1
+    private var ERROR_INDEX = 7
+    private var PASSED_INDEX = 8
 
     override fun onTestingStarted(testsRoot: SMTestProxy.SMRootTestProxy) {
         project = Util.getProject(testsRoot.locationUrl)
@@ -55,12 +57,12 @@ object FindXBugsAchievement : SMTRunnerEventsListener, Achievement() {
 
             if (key != null && fileContent != null) {
                 // If the test fails, check if the file content was already saved before, if not add content
-                if (test.magnitudeInfo == TestStateInfo.Magnitude.FAILED_INDEX
-                    || test.magnitudeInfo == TestStateInfo.Magnitude.ERROR_INDEX) {
+                if (test.magnitude == FAILED_INDEX
+                    || test.magnitude == ERROR_INDEX) {
                     if (!testsUnderObservation.containsKey(key)) {
                         testsUnderObservation[key] = fileContent
                     }
-                } else if (test.magnitudeInfo == TestStateInfo.Magnitude.PASSED_INDEX) {
+                } else if (test.magnitude == PASSED_INDEX) {
                     // If test passes check if the content is still the same
                     if (testsUnderObservation.containsKey(key) &&
                         testsUnderObservation[key] == fileContent

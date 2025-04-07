@@ -17,16 +17,22 @@
 package de.uni_passau.fim.se2.intelligame.services
 
 import com.google.gson.Gson
+import com.intellij.ide.DataManager
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.actionSystem.PlatformDataKeys
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.EditorNotifications
+import com.intellij.ui.content.ContentFactory
 import de.uni_passau.fim.se2.intelligame.MyBundle
 import de.uni_passau.fim.se2.intelligame.achievements.Achievement
 import de.uni_passau.fim.se2.intelligame.command.*
-import de.uni_passau.fim.se2.intelligame.components.GamificationToolWindow
+import de.uni_passau.fim.se2.intelligame.components.WindowPanel
 import de.uni_passau.fim.se2.intelligame.leaderboard.Leaderboard
 import de.uni_passau.fim.se2.intelligame.util.*
 import kotlinx.coroutines.GlobalScope
@@ -38,9 +44,10 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.sql.Timestamp
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
-
+@Service(Service.Level.PROJECT)
 class GamificationService(val project: Project) : Disposable {
     private val httpClient = OkHttpClient()
     private val gson = Gson()
@@ -129,6 +136,24 @@ class GamificationService(val project: Project) : Disposable {
         connect()
     }
 
+    private fun refresh(){
+        val project = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)
+        if(project == null){
+            thisLogger().error("Project is null, cannot refresh the window")
+            return
+        }
+
+        val toolWindowManager = ToolWindowManager.getInstance(project)
+        val toolWindow = toolWindowManager.getToolWindow("Gamification")!!
+
+        toolWindowManager.invokeLater {
+            toolWindow.contentManager.removeAllContents(true)
+            val panel = WindowPanel(project).create()
+            val content = ContentFactory.getInstance().createContent(panel, null, false)
+            toolWindow.contentManager.addContent(content)
+        }
+    }
+
     private suspend fun webSocketHeartbeat() {
         while (webSocketState == WebSocketState.CONNECTED) {
             webSocketClient.send("heartbeat")
@@ -215,7 +240,7 @@ class GamificationService(val project: Project) : Disposable {
         Logger.logStatus("Web socket state : $state", Logger.Kind.Debug, project)
         webSocketState = state
 
-        GamificationToolWindow.refresh()
+        refresh()
 
         if (webSocketState == WebSocketState.CONNECTED) {
             showNotification("Connected to gamification server")
@@ -241,7 +266,7 @@ class GamificationService(val project: Project) : Disposable {
     private fun onInitUsers(message: String) {
         val initUsersCommand = gson.fromJson(message, InitUsersCommand::class.java)
         Leaderboard.setUsers(initUsersCommand.payload)
-        GamificationToolWindow.refresh()
+        refresh()
     }
 
     private fun onUserPointsUpdated(message: String) {
@@ -254,14 +279,14 @@ class GamificationService(val project: Project) : Disposable {
         }
 
         Leaderboard.updateUser(user)
-        GamificationToolWindow.refresh()
+        refresh()
     }
 
     private fun onUserAdded(message: String) {
         val onUserAddedCommand = gson.fromJson(message, OnUserAddedCommand::class.java)
 
         Leaderboard.addUser(onUserAddedCommand.payload)
-        GamificationToolWindow.refresh()
+        refresh()
     }
 
     private fun onUsernameUpdated(message: String) {
@@ -274,7 +299,7 @@ class GamificationService(val project: Project) : Disposable {
         }
 
         Leaderboard.updateUser(user)
-        GamificationToolWindow.refresh()
+        refresh()
     }
 
     private fun showNotification(message: String) {

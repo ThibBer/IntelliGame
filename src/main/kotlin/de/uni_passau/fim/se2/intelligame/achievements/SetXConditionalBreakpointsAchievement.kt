@@ -20,20 +20,16 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.ProjectLocator
 import com.intellij.xdebugger.breakpoints.XBreakpoint
 import com.intellij.xdebugger.breakpoints.XBreakpointListener
-import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
 
 object SetXConditionalBreakpointsAchievement : XBreakpointListener<XBreakpoint<*>>,
     Achievement() {
 
     override fun breakpointChanged(breakpoint: XBreakpoint<*>) {
-        if (breakpoint is XBreakpointBase<*, *, *>
-            && breakpoint.isConditionEnabled
-            && breakpoint.getConditionExpression() != null) {
-            var progress = progress()
-            progress += 1
-            val project = breakpoint.sourcePosition?.file?.let { ProjectLocator.getInstance().guessProjectForFile(it) }
-            handleProgress(progress, project)
-        }
+        var progress = progress()
+        progress += 1
+        val project = breakpoint.sourcePosition?.file?.let { ProjectLocator.getInstance().guessProjectForFile(it) }
+        handleProgress(progress, project)
+
         super.breakpointChanged(breakpoint)
     }
 

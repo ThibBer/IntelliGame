@@ -16,6 +16,7 @@
 
 package de.uni_passau.fim.se2.intelligame.achievements
 
+import com.intellij.execution.testframework.AbstractTestProxy
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.execution.testframework.sm.runner.states.TestStateInfo
@@ -30,6 +31,8 @@ object RepairXWrongTestsAchievement : SMTRunnerEventsListener, Achievement() {
     private var testsUnderObservation = hashMapOf<String, String>()
     private var classesUnderObservation = hashMapOf<String, String>()
     private var project: Project? = null
+    private var FAILED_INDEX = 1
+    private var PASSED_INDEX = 8
 
     override fun onTestingStarted(testsRoot: SMTestProxy.SMRootTestProxy) {
         project = Util.getProject(testsRoot.locationUrl)
@@ -49,8 +52,11 @@ object RepairXWrongTestsAchievement : SMTRunnerEventsListener, Achievement() {
             ?.removePrefix("java:test://")
             ?.replace(".", "/")
             ?: "")
-        val pathToTest = project?.basePath + "${File.separator}src${File.separator}test${File.separator}java${File.separator}" + fileUrl + ".java"
-        val pathToCode = project?.basePath + "${File.separator}src${File.separator}main${File.separator}java${File.separator}" + fileUrl.dropLast(4) + ".java"
+
+        val basePath = project?.basePath + "${File.separator}src${File.separator}test${File.separator}java${File.separator}"
+        val pathToTest = "$basePath$fileUrl.java"
+        val pathToCode = basePath + fileUrl.dropLast(4) + ".java"
+
         val testFile = File(pathToTest)
         val codeFile = File(pathToCode)
 
@@ -58,10 +64,10 @@ object RepairXWrongTestsAchievement : SMTRunnerEventsListener, Achievement() {
             val testFileContent = FileUtils.readFileToString(testFile, Charset.defaultCharset()).replace(System.lineSeparator(), "")
             val codeFileContent = FileUtils.readFileToString(codeFile, Charset.defaultCharset()).replace(System.lineSeparator(), "")
 
-            if (test.magnitudeInfo == TestStateInfo.Magnitude.FAILED_INDEX && !testsUnderObservation.containsKey(key) && !classesUnderObservation.containsKey(key)) {
+            if (test.magnitude == FAILED_INDEX && !testsUnderObservation.containsKey(key) && !classesUnderObservation.containsKey(key)) {
                 testsUnderObservation[key] = testFileContent
                 classesUnderObservation[key] = codeFileContent
-            } else if (test.magnitudeInfo == TestStateInfo.Magnitude.PASSED_INDEX) {
+            } else if (test.magnitude == PASSED_INDEX) {
                 if (testsUnderObservation.containsKey(key) && classesUnderObservation.containsKey(key) && testsUnderObservation[key] != testFileContent && classesUnderObservation[key] == codeFileContent) {
                     var progress = progress()
                     progress += 1
