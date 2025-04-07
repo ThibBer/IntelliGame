@@ -13,6 +13,7 @@
     </ul>
     ]]></description>
 
+    <depends>com.intellij.modules.coverage</depends>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.java</depends>
@@ -29,7 +30,6 @@
         <postStartupActivity implementation="de.uni_passau.fim.se2.intelligame.listeners.ProjectActivity"/>
 
         <notificationGroup id="Gamification" displayType="BALLOON"/>
-        <testStatusListener implementation="de.uni_passau.fim.se2.intelligame.listeners.KoverageListener"/>
         <editorNotificationProvider id="WebSocketNotConnectedNotificationProvider" implementation="de.uni_passau.fim.se2.intelligame.components.WebSocketNotConnectedNotificationProvider" />
     </extensions>
 </idea-plugin>

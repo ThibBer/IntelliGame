@@ -6,6 +6,6 @@
 
 Full version of the plugin including 26 achievements for both Java and JavaScript.
 
-## 0.1.3
+## 0.1.3-beta
 
-Update
+Remove javascript support, add leaderboard

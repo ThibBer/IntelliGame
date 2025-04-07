@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.intelliJPlatform)
     alias(libs.plugins.changelog)
-    alias(libs.plugins.kover)
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -24,6 +23,7 @@ repositories {
 
     intellijPlatform {
         defaultRepositories()
+        intellijDependencies()
     }
 }
 
@@ -93,15 +93,20 @@ intellijPlatform {
     }
 }
 
+
 dependencies {
     intellijPlatform {
-        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
+        //create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
+        local("C:/Users/thiba/AppData/Local/Programs/IntelliJ IDEA Ultimate")
 
-        // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.providers.gradleProperty file for bundled IntelliJ Platform plugins.
+        // Bundled Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.providers.gradleProperty file for bundled IntelliJ Platform plugins.
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
 
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.providers.gradleProperty file for plugin from JetBrains Marketplace.
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
+
+        // Bundled Modules
+        bundledModules(providers.gradleProperty("bundledModules").map { it.split(',') })
 
         pluginVerifier()
         zipSigner()
@@ -110,10 +115,10 @@ dependencies {
 
     implementation("org.apache.commons:commons-text:1.10.0")
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")
-    implementation("com.github.tsantalis:refactoring-miner:2.2.0")
     implementation("org.apache.commons:commons-csv:1.10.0")
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
-    implementation("com.google.code.gson:gson:2.12.1")
+    implementation("com.github.tsantalis:refactoring-miner:2.2.0")
+    implementation(libs.okhttp)
+    implementation(libs.gson)
 
     testImplementation(libs.junit)
 }

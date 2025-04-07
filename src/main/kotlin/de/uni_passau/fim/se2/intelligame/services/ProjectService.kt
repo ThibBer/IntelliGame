@@ -16,6 +16,7 @@
 
 package de.uni_passau.fim.se2.intelligame.services
 
+import com.intellij.coverage.CoverageDataManager
 import com.intellij.execution.ExecutionManager
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.openapi.Disposable
@@ -27,29 +28,32 @@ import com.intellij.xdebugger.breakpoints.XBreakpointListener
 import de.uni_passau.fim.se2.intelligame.achievements.*
 import de.uni_passau.fim.se2.intelligame.listeners.BulkFileListenerImpl
 import de.uni_passau.fim.se2.intelligame.listeners.ConsoleListener
+import de.uni_passau.fim.se2.intelligame.listeners.CoverageListener
 
 @Service(Service.Level.PROJECT)
 class ProjectService(val project: Project) : Disposable {
     init {
         println("Project service")
 
-        project.messageBus.connect().subscribe(SMTRunnerEventsListener.TEST_STATUS, TriggerXAssertsByTestsAchievement)
-        project.messageBus.connect().subscribe(XDebuggerManager.TOPIC, RunXDebuggerModeAchievement)
-        project.messageBus.connect().subscribe(SMTRunnerEventsListener.TEST_STATUS, RunXTestsAchievement)
-        project.messageBus.connect().subscribe(SMTRunnerEventsListener.TEST_STATUS, RunXTestSuitesAchievement)
-        project.messageBus.connect().subscribe(SMTRunnerEventsListener.TEST_STATUS, RunXTestSuitesWithXTestsAchievement)
-        project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, SetXBreakpointsAchievement)
-        project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, SetXConditionalBreakpointsAchievement)
-        project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, SetXFieldWatchpointsAchievement)
-        project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, SetXLineBreakpointsAchievement)
-        project.messageBus.connect().subscribe(XBreakpointListener.TOPIC, SetXMethodBreakpointsAchievement)
-        project.messageBus.connect().subscribe(SMTRunnerEventsListener.TEST_STATUS, FindXBugsAchievement)
-        project.messageBus.connect().subscribe(SMTRunnerEventsListener.TEST_STATUS, RepairXWrongTestsAchievement)
+        project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, TriggerXAssertsByTestsAchievement)
+        project.messageBus.connect(this).subscribe(XDebuggerManager.TOPIC, RunXDebuggerModeAchievement)
+        project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, RunXTestsAchievement)
+        project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, RunXTestSuitesAchievement)
+        project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, RunXTestSuitesWithXTestsAchievement)
+        project.messageBus.connect(this).subscribe(XBreakpointListener.TOPIC, SetXBreakpointsAchievement)
+        project.messageBus.connect(this).subscribe(XBreakpointListener.TOPIC, SetXConditionalBreakpointsAchievement)
+        project.messageBus.connect(this).subscribe(XBreakpointListener.TOPIC, SetXFieldWatchpointsAchievement)
+        project.messageBus.connect(this).subscribe(XBreakpointListener.TOPIC, SetXLineBreakpointsAchievement)
+        project.messageBus.connect(this).subscribe(XBreakpointListener.TOPIC, SetXMethodBreakpointsAchievement)
+        project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, FindXBugsAchievement)
+        project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, RepairXWrongTestsAchievement)
 
-        project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, RefactorAddXAssertionsAchievement)
-        project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, AddTestsAchievement)
-        project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, BulkFileListenerImpl)
-        project.messageBus.connect().subscribe(ExecutionManager.EXECUTION_TOPIC, ConsoleListener)
+        project.messageBus.connect(this).subscribe(VirtualFileManager.VFS_CHANGES, RefactorAddXAssertionsAchievement)
+        project.messageBus.connect(this).subscribe(VirtualFileManager.VFS_CHANGES, AddTestsAchievement)
+        project.messageBus.connect(this).subscribe(VirtualFileManager.VFS_CHANGES, BulkFileListenerImpl)
+        project.messageBus.connect(this).subscribe(ExecutionManager.EXECUTION_TOPIC, ConsoleListener)
+
+        CoverageDataManager.getInstance(project).addSuiteListener(CoverageListener, this)
     }
 
     override fun dispose() = Unit
