@@ -28,6 +28,7 @@ import com.intellij.openapi.util.Key
 import de.uni_passau.fim.se2.intelligame.achievements.*
 import de.uni_passau.fim.se2.intelligame.util.CoverageInfo
 import de.uni_passau.fim.se2.intelligame.util.Logger
+import de.uni_passau.fim.se2.intelligame.util.Util
 import java.io.File
 
 object ConsoleListener : ExecutionListener {
@@ -37,66 +38,87 @@ object ConsoleListener : ExecutionListener {
     var triggered = false
 
     override fun processStarted(executorId: String, env: ExecutionEnvironment, handler: ProcessHandler) {
+        if(Util.isTestExcluded(env.runProfile.name)){
+            return
+        }
+
         handler.addProcessListener(ConsoleAdapter())
         project = env.project
         coverageRun = false
     }
 
-    override fun processTerminated(
-        executorId: String,
-        env: ExecutionEnvironment,
-        handler: ProcessHandler,
-        exitCode: Int
-    ) {
-        if (coverageRun) {
-            val path = ProjectRootManager.getInstance(env.project).contentRoots[0].path
-            val file = File("$path${File.separator}coverage${File.separator}coverage-summary.json")
-            if (!file.exists()) return
-            val coverageData = file.readText().split("\n")
-            for(line in coverageData) {
-                val regex = Regex(",\"$path/(.*)\": \\{" +
-                        "\"lines\":\\{\"total\":(\\d+),\"covered\":(\\d+),\"skipped\":\\d+,\"pct\":[\\d.]+}," +
-                        "\"functions\":\\{\"total\":(\\d+),\"covered\":(\\d+),\"skipped\":\\d+,\"pct\":[\\d.]+}," +
-                        "\"statements\":\\{\"total\":(\\d+),\"covered\":(\\d+),\"skipped\":\\d+,\"pct\":[\\d.]+}," +
-                        "\"branches\":\\{\"total\":(\\d+),\"covered\":(\\d+),\"skipped\":\\d+,\"pct\":[\\d.]+}}")
-                if (!regex.containsMatchIn(line)) continue
-                val groupValues = regex.findAll(line).first().groupValues
-                val fileName = groupValues[1]
-                val coverageInfo = CoverageInfo(
-                    1,
-                    1,
-                    groupValues[4].toInt(),
-                    groupValues[5].toInt(),
-                    groupValues[2].toInt(),
-                    groupValues[3].toInt(),
-                    groupValues[8].toInt(),
-                    groupValues[9].toInt(),
-                )
-
-                GetXLineCoverageInClassesWithYLinesAchievement.triggerAchievement(coverageInfo, fileName, project)
-                GetXBranchCoverageInClassesWithYBranchesAchievement.triggerAchievement(coverageInfo, fileName, project)
-                GetXMethodCoverageInClassesWithYMethodsAchievement.triggerAchievement(coverageInfo, fileName, project)
-                CoverXClassesAchievement.triggerAchievement(coverageInfo, project)
-            }
-            RunXTestSuitesAchievement.triggerAchievement()
-            coverageRun = false
+    override fun processTerminated(executorId: String, env: ExecutionEnvironment, handler: ProcessHandler, exitCode: Int) {
+        if (Util.isTestExcluded(env.runProfile.name) || !coverageRun) {
+            return;
         }
+
+        val path = ProjectRootManager.getInstance(env.project).contentRoots[0].path
+        val file = File("$path${File.separator}coverage${File.separator}coverage-summary.json")
+        if (!file.exists()) {
+            return
+        }
+
+        val coverageData = file.readText().split("\n")
+        for(line in coverageData) {
+            val regex = Regex(",\"$path/(.*)\": \\{" +
+                    "\"lines\":\\{\"total\":(\\d+),\"covered\":(\\d+),\"skipped\":\\d+,\"pct\":[\\d.]+}," +
+                    "\"functions\":\\{\"total\":(\\d+),\"covered\":(\\d+),\"skipped\":\\d+,\"pct\":[\\d.]+}," +
+                    "\"statements\":\\{\"total\":(\\d+),\"covered\":(\\d+),\"skipped\":\\d+,\"pct\":[\\d.]+}," +
+                    "\"branches\":\\{\"total\":(\\d+),\"covered\":(\\d+),\"skipped\":\\d+,\"pct\":[\\d.]+}}")
+
+            if (!regex.containsMatchIn(line)) {
+                continue
+            }
+
+            val groupValues = regex.findAll(line).first().groupValues
+            val fileName = groupValues[1]
+            val coverageInfo = CoverageInfo(
+                1,
+                1,
+                groupValues[4].toInt(),
+                groupValues[5].toInt(),
+                groupValues[2].toInt(),
+                groupValues[3].toInt(),
+                groupValues[8].toInt(),
+                groupValues[9].toInt(),
+            )
+
+            GetXLineCoverageInClassesWithYLinesAchievement.triggerAchievement(coverageInfo, fileName, project)
+            GetXBranchCoverageInClassesWithYBranchesAchievement.triggerAchievement(coverageInfo, fileName, project)
+            GetXMethodCoverageInClassesWithYMethodsAchievement.triggerAchievement(coverageInfo, fileName, project)
+            CoverXClassesAchievement.triggerAchievement(coverageInfo, project)
+        }
+
+        RunXTestSuitesAchievement.triggerAchievement()
+        coverageRun = false
+
         super.processTerminated(executorId, env, handler, exitCode)
     }
 
     class ConsoleAdapter : ProcessAdapter() {
 
         override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-            if (outputType != ProcessOutputTypes.STDOUT) return
-            if (!triggered) triggerTestsAchievements(event.text)
+            if (outputType != ProcessOutputTypes.STDOUT) {
+                return
+            }
+
+            if (!triggered) {
+                triggerTestsAchievements(event.text)
+            }
+
             val coverageInfo = extractCoverageInfo(event.text)
-            if (coverageInfo.isEmpty()) return
+            if (coverageInfo.isEmpty()) {
+                return
+            }
+
             coverageRun = true
+
             if (!triggered) {
                 RunWithCoverageAchievement.triggerAchievement(project)
                 CoverXLinesAchievement.triggerAchievement(coverageInfo, project)
                 CoverXMethodsAchievement.triggerAchievement(coverageInfo, project)
                 CoverXBranchesAchievement.triggerAchievement(coverageInfo, project)
+
                 triggered = true
             }
         }
@@ -104,6 +126,7 @@ object ConsoleListener : ExecutionListener {
         private fun triggerTestsAchievements(output: String) {
             val regex = Regex("Tests:[^,]*,\\s(\\d+)\\stotal")
             val tests = regex.find(output)?.groupValues?.get(1)?.toInt()
+
             if (tests != null) {
                 RunXTestsAchievement.triggerAchievement(tests)
                 RunXTestSuitesAchievement.triggerAchievement()
@@ -121,6 +144,7 @@ object ConsoleListener : ExecutionListener {
             val totalMethodsCount = functionsRegex.find(output)?.groupValues?.get(2)?.toInt()
             val coveredBranchesCount = branchesRegex.find(output)?.groupValues?.get(1)?.toInt()
             val totalBranchesCount = branchesRegex.find(output)?.groupValues?.get(2)?.toInt()
+
             return CoverageInfo(
                 0,
                 0,

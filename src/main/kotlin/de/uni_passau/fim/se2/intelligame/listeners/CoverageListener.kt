@@ -28,6 +28,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import de.uni_passau.fim.se2.intelligame.util.Util
 import java.lang.reflect.Field
 object CoverageListener : CoverageSuiteListener {
     lateinit var project: Project
@@ -54,66 +55,43 @@ object CoverageListener : CoverageSuiteListener {
         val suitesBundle: CoverageSuitesBundle = dataManager.currentSuitesBundle ?: return
         val annotator = suitesBundle.coverageEngine.getCoverageAnnotator(project)
 
-        val modalTask: Task.Modal =
-            object : Task.Modal(project, "Modal Cancelable Task", false) {
-
-                override fun run(indicator: ProgressIndicator) {
-                    if (annotator::class.simpleName == "JavaCoverageAnnotator") {
-                        javaCoverage()
-                    } else if (annotator::class.simpleName == "JestCoverageAnnotator") {
-                        jestCoverage()
-                    }
-                }
-
-                fun javaCoverage() {
-                    // Check for class coverage information
-                    val classCoverageInfosField: Field = annotator.javaClass.getDeclaredField("myClassCoverageInfos")
-                    classCoverageInfosField.isAccessible = true
-                    val classCoverageInfosValue: Map<Any, Any> = classCoverageInfosField.get(annotator) as Map<Any, Any>
-
-                    for ((key, value) in classCoverageInfosValue) {
-                        val coverageInfo = extractCoverageInfos(value)
-
-                        GetXLineCoverageInClassesWithYLinesAchievement.triggerAchievement(coverageInfo, key as String, project)
-                        GetXBranchCoverageInClassesWithYBranchesAchievement.triggerAchievement(coverageInfo, key, project)
-                        GetXMethodCoverageInClassesWithYMethodsAchievement.triggerAchievement(coverageInfo, key, project)
-                        CoverXLinesAchievement.triggerAchievement(coverageInfo, project)
-                        CoverXMethodsAchievement.triggerAchievement(coverageInfo, project)
-                        CoverXClassesAchievement.triggerAchievement(coverageInfo, project)
-                        CoverXBranchesAchievement.triggerAchievement(coverageInfo, project)
-                    }
-
-                    val extensionCoverageField: Field = annotator.javaClass.getDeclaredField("myDirCoverageInfos")
-                    extensionCoverageField.isAccessible = true
-
-                    val extensionCoverageInfosValue: Map<Any, Any> = extensionCoverageField.get(annotator) as Map<Any, Any>
-
-                    if (extensionCoverageInfosValue.isEmpty()) {
-                        ApplicationManager.getApplication().invokeLater(fun() {
-                            ProgressManager.getInstance().run(this)
-                        })
-                    }
-                }
-
-                fun jestCoverage() {
-                    // Check for file coverage information
-                    val fileCoverageInfosField: Field = annotator.javaClass.superclass.getDeclaredField("myFileCoverageInfos")
-                    fileCoverageInfosField.isAccessible = true
-
-                    val fileCoverageInfosValue: Map<Any, Any> = fileCoverageInfosField.get(annotator) as Map<Any, Any>
-
-                    for ((key, value) in fileCoverageInfosValue) {
-                        val coverageInfo = extractJestCoverageInfos(value)
-                        GetXLineCoverageInClassesWithYLinesAchievement.triggerAchievement(
-                            coverageInfo,
-                            key as String,
-                            project
-                        )
-                        CoverXLinesAchievement.triggerAchievement(coverageInfo, project)
-                        CoverXClassesAchievement.triggerAchievement(coverageInfo, project)
-                    }
+        val modalTask: Task.Modal = object : Task.Modal(project, "Modal Cancelable Task", false) {
+            override fun run(indicator: ProgressIndicator) {
+                if (annotator::class.simpleName == "JavaCoverageAnnotator") {
+                    javaCoverage()
                 }
             }
+
+            fun javaCoverage() {
+                // Check for class coverage information
+                val classCoverageInfosField: Field = annotator.javaClass.getDeclaredField("myClassCoverageInfos")
+                classCoverageInfosField.isAccessible = true
+                val classCoverageInfosValue: Map<Any, Any> = classCoverageInfosField.get(annotator) as Map<Any, Any>
+
+                for ((key, value) in classCoverageInfosValue.filter { !Util.isTestExcluded(it.key as String) }) {
+                    val coverageInfo = extractCoverageInfos(value)
+
+                    GetXLineCoverageInClassesWithYLinesAchievement.triggerAchievement(coverageInfo, key as String, project)
+                    GetXBranchCoverageInClassesWithYBranchesAchievement.triggerAchievement(coverageInfo, key, project)
+                    GetXMethodCoverageInClassesWithYMethodsAchievement.triggerAchievement(coverageInfo, key, project)
+                    CoverXLinesAchievement.triggerAchievement(coverageInfo, project)
+                    CoverXMethodsAchievement.triggerAchievement(coverageInfo, project)
+                    CoverXClassesAchievement.triggerAchievement(coverageInfo, project)
+                    CoverXBranchesAchievement.triggerAchievement(coverageInfo, project)
+                }
+
+                val extensionCoverageField: Field = annotator.javaClass.getDeclaredField("myDirCoverageInfos")
+                extensionCoverageField.isAccessible = true
+
+                val extensionCoverageInfosValue: Map<Any, Any> = extensionCoverageField.get(annotator) as Map<Any, Any>
+
+                if (extensionCoverageInfosValue.isEmpty()) {
+                    ApplicationManager.getApplication().invokeLater(fun() {
+                        ProgressManager.getInstance().run(this)
+                    })
+                }
+            }
+        }
 
         ApplicationManager.getApplication().invokeLater(fun() {
             ProgressManager.getInstance().run(modalTask)
@@ -138,21 +116,6 @@ object CoverageListener : CoverageSuiteListener {
             coveredLineCount,
             totalBranchCount,
             coveredBranchCount
-        )
-    }
-
-    private fun extractJestCoverageInfos(coverageInfo: Any): CoverageInfo {
-        val coveredLineCount = getFieldAsInt(coverageInfo, "coveredLineCount")
-        val totalLineCount = getFieldAsInt(coverageInfo, "totalLineCount")
-        return CoverageInfo(
-            1,
-            1,
-            0,
-            0,
-            totalLineCount,
-            coveredLineCount,
-            0,
-            0
         )
     }
 

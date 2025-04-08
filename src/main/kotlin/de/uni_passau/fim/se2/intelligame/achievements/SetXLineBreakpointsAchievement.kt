@@ -20,16 +20,24 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.ProjectLocator
 import com.intellij.xdebugger.breakpoints.XBreakpoint
 import com.intellij.xdebugger.breakpoints.XBreakpointListener
+import de.uni_passau.fim.se2.intelligame.util.Util
 
 object SetXLineBreakpointsAchievement : XBreakpointListener<XBreakpoint<*>>,
     Achievement() {
     override fun breakpointAdded(breakpoint: XBreakpoint<*>) {
-        if (breakpoint.type.id == "java-line" || breakpoint.type.title == "JavaScript Line Breakpoints") {
+        val file = breakpoint.sourcePosition?.file
+        if(file == null || Util.isTestExcluded(file.path)){
+            return
+        }
+
+        if (breakpoint.type.id == "java-line") {
             var progress = progress()
             progress += 1
-            val project = breakpoint.sourcePosition?.file?.let { ProjectLocator.getInstance().guessProjectForFile(it) }
+
+            val project = file.let { ProjectLocator.getInstance().guessProjectForFile(it) }
             handleProgress(progress, project)
         }
+
         super.breakpointAdded(breakpoint)
     }
 

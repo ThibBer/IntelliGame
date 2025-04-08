@@ -20,6 +20,7 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.ProjectLocator
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
+import de.uni_passau.fim.se2.intelligame.util.Util
 import java.io.File
 
 object RefactorAddXAssertionsAchievement : BulkFileListener, Achievement() {
@@ -27,21 +28,16 @@ object RefactorAddXAssertionsAchievement : BulkFileListener, Achievement() {
     private val regex = "/\\*(?:[^*]|\\*+[^*/])*\\*+/|//.*".toRegex()
 
     override fun before(events: MutableList<out VFileEvent>) {
-        for (event in events) {
+        for (event in events.filter { !Util.isTestExcluded(it.path) }) {
             val file = File(event.path)
             if (file.exists()) {
                 var counter = 0
                 if (event.path.endsWith("Test.java")) {
-                    counter =
-                        countAsserts(
-                            file.readText().replace(regex, "")
-                        )
-                } else if (event.path.endsWith("test.js") || file.path.endsWith("test.ts")) {
-                    counter =
-                        countJestAsserts(
-                            file.readText().replace(regex, "")
-                        )
+                    counter = countAsserts(
+                        file.readText().replace(regex, "")
+                    )
                 }
+
                 filesUnderObservation[event.path] = counter
             }
             super.before(events)
@@ -49,30 +45,21 @@ object RefactorAddXAssertionsAchievement : BulkFileListener, Achievement() {
     }
 
     override fun after(events: MutableList<out VFileEvent>) {
-        for (event in events) {
+        for (event in events.filter { !Util.isTestExcluded(it.path) }) {
             val file = File(event.path)
-            if (file.exists()) {
-                var counter = 0
-                if (event.path.endsWith("Test.java")) {
-                    counter =
-                        countAsserts(
-                            file.readText().replace(regex, "")
-                        )
-                } else if (event.path.endsWith("test.js") || file.path.endsWith("test.ts")) {
-                    counter =
-                        countJestAsserts(
-                            file.readText().replace(regex, "")
-                        )
-                }
+
+            if (file.exists() && event.path.endsWith("Test.java")) {
+                val counter = countAsserts(file.readText().replace(regex, ""))
 
                 if (counter != 0) {
-                    if (filesUnderObservation.containsKey(event.path)
-                        && filesUnderObservation[event.path]!! < counter) {
+                    if (filesUnderObservation.containsKey(event.path) && filesUnderObservation[event.path]!! < counter) {
                         var progress = progress()
                         progress += (counter - filesUnderObservation[event.path]!!)
+
                         val project = event.file?.let { ProjectLocator.getInstance().guessProjectForFile(it) }
                         handleProgress(progress, project)
                     }
+
                     filesUnderObservation[event.path] = counter
                 }
             }

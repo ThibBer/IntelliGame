@@ -18,6 +18,7 @@ package de.uni_passau.fim.se2.intelligame.util
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import de.uni_passau.fim.se2.intelligame.MyBundle
 import de.uni_passau.fim.se2.intelligame.achievements.*
 import java.io.File
 import kotlin.random.Random
@@ -136,5 +137,19 @@ object Util {
 
     fun getEvaluationFilePath(project: Project, filename: String): String{
         return getEvaluationDirectoryPath(project) + File.separator + filename
+    }
+
+    fun isTestExcluded(testName: String?): Boolean{
+        if(testName == null){
+            return false
+        }
+
+        return MyBundle.getMessage("excludedTestClasses")
+            .split(",")
+            .any {
+                testName.contains(
+                    it.replace("/", ".").replace("\\", ".")
+                )
+            }
     }
 }

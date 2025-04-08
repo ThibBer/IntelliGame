@@ -16,10 +16,8 @@
 
 package de.uni_passau.fim.se2.intelligame.achievements
 
-import com.intellij.execution.testframework.AbstractTestProxy
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
-import com.intellij.execution.testframework.sm.runner.states.TestStateInfo
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
 import de.uni_passau.fim.se2.intelligame.util.Util
@@ -48,10 +46,13 @@ object RepairXWrongTestsAchievement : SMTRunnerEventsListener, Achievement() {
 
     override fun onTestFinished(test: SMTestProxy) {
         val key = test.locationUrl
-        val fileUrl = (test.locationUrl?.removeRange(test.locationUrl!!.lastIndexOf("/"), test.locationUrl!!.length)
-            ?.removePrefix("java:test://")
-            ?.replace(".", "/")
-            ?: "")
+        if(key == null || Util.isTestExcluded(key)) {
+            return
+        }
+
+        val fileUrl = key.removeRange(key.lastIndexOf("/"), key.length)
+            .removePrefix("java:test://")
+            .replace(".", "/")
 
         val basePath = project?.basePath + "${File.separator}src${File.separator}test${File.separator}java${File.separator}"
         val pathToTest = "$basePath$fileUrl.java"
@@ -60,7 +61,7 @@ object RepairXWrongTestsAchievement : SMTRunnerEventsListener, Achievement() {
         val testFile = File(pathToTest)
         val codeFile = File(pathToCode)
 
-        if (key != null && testFile.exists() && codeFile.exists()) {
+        if (testFile.exists() && codeFile.exists()) {
             val testFileContent = FileUtils.readFileToString(testFile, Charset.defaultCharset()).replace(System.lineSeparator(), "")
             val codeFileContent = FileUtils.readFileToString(codeFile, Charset.defaultCharset()).replace(System.lineSeparator(), "")
 

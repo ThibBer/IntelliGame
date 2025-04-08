@@ -47,33 +47,28 @@ object FindXBugsAchievement : SMTRunnerEventsListener, Achievement() {
     override fun onTestFinished(test: SMTestProxy) {
         SwingUtilities.invokeLater {
             val fileContent =
-                test
-                .getLocation(project!!, GlobalSearchScope.allScope(project!!))
-                ?.virtualFile
+                test.getLocation(project!!, GlobalSearchScope.allScope(project!!))?.virtualFile
                 ?.readText()
                 ?.replace("\n", "")
                 ?.replace("\r", "")
+
             val key = test.locationUrl
 
-            if (key != null && fileContent != null) {
+            if (key != null && !Util.isTestExcluded(key) && fileContent != null) {
                 // If the test fails, check if the file content was already saved before, if not add content
-                if (test.magnitude == FAILED_INDEX
-                    || test.magnitude == ERROR_INDEX) {
+                if (test.magnitude == FAILED_INDEX || test.magnitude == ERROR_INDEX) {
                     if (!testsUnderObservation.containsKey(key)) {
                         testsUnderObservation[key] = fileContent
                     }
                 } else if (test.magnitude == PASSED_INDEX) {
                     // If test passes check if the content is still the same
-                    if (testsUnderObservation.containsKey(key) &&
-                        testsUnderObservation[key] == fileContent
-                    ) {
+                    if (testsUnderObservation.containsKey(key) && testsUnderObservation[key] == fileContent) {
                         var progress = progress()
                         progress++
                         handleProgress(progress, project)
-                        testsUnderObservation.remove(key)
-                    } else {
-                        testsUnderObservation.remove(key)
                     }
+
+                    testsUnderObservation.remove(key)
                 }
             }
         }

@@ -45,30 +45,26 @@ object TriggerXAssertsByTestsAchievement : SMTRunnerEventsListener, Achievement(
     }
 
     override fun onTestFinished(test: SMTestProxy) {
-        if (test.isPassed) {
-            val project = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)!!
-            SwingUtilities.invokeLater {
-                val file = test.getLocation(project, ProjectScopeImpl(project, FileIndexFacade.getInstance(project)))!!
-                    .virtualFile
-                var count = 0
-                if (file!!.path.endsWith("Test.java")) {
-                    val testText =
-                        test.getLocation(project, ProjectScopeImpl(project, FileIndexFacade.getInstance(project)))!!
-                            .psiElement.text
-                    count = "assert".toRegex().findAll(testText).count()
-                } else if (file.path.endsWith("test.js") || file.path.endsWith("test.ts")) {
-                    val testTitle =
-                        test.getLocation(project, ProjectScopeImpl(project, FileIndexFacade.getInstance(project)))!!
-                            .psiElement.text
-                    val testText = "\\s(?:test|it)\\($testTitle(.|\\n|\\r)*?(?=test\\(|\\Z|describe\\(|it\\()".toRegex()
-                        .find(file.readText())?.value ?: ""
-                    count = "expect".toRegex().findAll(testText).count()
-                }
+        if(Util.isTestExcluded(test.locationUrl) || !test.isPassed){
+            return
+        }
+
+        val project = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)!!
+        SwingUtilities.invokeLater {
+            val file = test.getLocation(project, ProjectScopeImpl(project, FileIndexFacade.getInstance(project)))!!.virtualFile
+
+            if (file!!.path.endsWith("Test.java")) {
+                val testText =
+                    test.getLocation(project, ProjectScopeImpl(project, FileIndexFacade.getInstance(project)))!!
+                        .psiElement.text
+
+                val count = "assert".toRegex().findAll(testText).count()
 
                 var progress = progress()
                 progress += count
                 handleProgress(progress, project)
             }
+
         }
     }
 

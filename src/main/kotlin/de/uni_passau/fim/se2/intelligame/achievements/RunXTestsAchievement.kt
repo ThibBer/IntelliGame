@@ -37,7 +37,7 @@ object RunXTestsAchievement : SMTRunnerEventsListener, Achievement() {
 
     fun getAllTests(tests: List<SMTestProxy>): Int {
         var number = 0
-        for (test in tests) {
+        for (test in tests.filter { !Util.isTestExcluded(it.locationUrl) }) {
             if (test.isLeaf) {
                 number++
             } else {

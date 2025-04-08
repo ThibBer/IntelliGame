@@ -20,12 +20,12 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.xdebugger.XDebugProcess
 import com.intellij.xdebugger.XDebuggerManagerListener
 
-object RunXDebuggerModeAchievement : XDebuggerManagerListener,
-    Achievement() {
+object RunXDebuggerModeAchievement : XDebuggerManagerListener, Achievement() {
     override fun processStarted(debugProcess: XDebugProcess) {
         var progress = progress()
         progress += 1
         handleProgress(progress, debugProcess.session.project)
+
         super.processStarted(debugProcess)
     }
 

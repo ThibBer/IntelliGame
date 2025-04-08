@@ -176,9 +176,13 @@ abstract class Achievement {
             }
 
             refreshWindow()
-            CSVReportGenerator.generateCSVReport(project, "Achievements.csv")
+            CSVReportGenerator.generateCSVReport(project, "AchievementsReport.csv")
         }
 
+    }
+
+    open fun isActive(): Boolean {
+        return true
     }
 
     abstract fun supportsLanguages(): List<Language>

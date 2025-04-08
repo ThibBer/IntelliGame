@@ -30,13 +30,22 @@ object RunXTestSuitesAchievement : SMTRunnerEventsListener, Achievement() {
     }
 
     override fun onTestingFinished(testsRoot: SMTestProxy.SMRootTestProxy) {
+        if(Util.isTestExcluded(testsRoot.locationUrl)){
+            return
+        }
+
         var progress = progress()
         progress += 1
         handleProgress(progress, project)
-        if (GetXLineCoverageInClassesWithYLinesAchievement.getLevel() == 0
-            && GetXLineCoverageInClassesWithYLinesAchievement.getClassesWhichFulfillRequirements() == "") {
+
+        val level = GetXLineCoverageInClassesWithYLinesAchievement.getLevel()
+        val classesWhichFulfillRequirements = GetXLineCoverageInClassesWithYLinesAchievement.getClassesWhichFulfillRequirements()
+
+        if (level == 0 && classesWhichFulfillRequirements == "") {
             showAchievementNotification(
-                "You might want to run your tests with coverage to see if you missed anything!", project)
+                "You might want to run your tests with coverage to see if you missed anything!",
+                project
+            )
         }
     }
 
@@ -76,12 +85,12 @@ object RunXTestSuitesAchievement : SMTRunnerEventsListener, Achievement() {
 
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
-        return properties.getInt(RunXDebuggerModeAchievement.getPropertyKey(), 0)
+        return properties.getInt(getPropertyKey(), 0)
     }
 
     override fun updateProgress(progress: Int) {
         val properties = PropertiesComponent.getInstance()
-        properties.setValue(RunXDebuggerModeAchievement.getPropertyKey(), progress, 0)
+        properties.setValue(getPropertyKey(), progress, 0)
     }
 
     override fun getDescription(): String {
