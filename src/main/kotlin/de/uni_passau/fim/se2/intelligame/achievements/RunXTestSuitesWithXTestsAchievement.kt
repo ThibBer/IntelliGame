@@ -30,8 +30,6 @@ object RunXTestSuitesWithXTestsAchievement : SMTRunnerEventsListener, Achievemen
     }
 
     override fun onTestingFinished(testsRoot: SMTestProxy.SMRootTestProxy) {
-        val testCounter = RunXTestsAchievement.getAllTests(testsRoot.children)
-        triggerAchievement(testCounter)
     }
 
     fun triggerAchievement(tests: Int) {
@@ -108,18 +106,18 @@ object RunXTestSuitesWithXTestsAchievement : SMTRunnerEventsListener, Achievemen
     private fun requiredTestsInSuite(): Int {
         val level = getLevel()
         if (level <= 1) {
-            return 100
+            return 10
         }
 
         if (level <= 2) {
-            return 500
+            return 20
         }
 
         if (level <= 3) {
-            return 1000
+            return 30
         }
 
-        return 3000
+        return 40
     }
 
     override fun supportsLanguages(): List<Language> {

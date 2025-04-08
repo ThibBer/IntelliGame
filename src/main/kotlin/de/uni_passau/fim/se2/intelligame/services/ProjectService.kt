@@ -37,7 +37,6 @@ class ProjectService(val project: Project) : Disposable {
 
         project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, TriggerXAssertsByTestsAchievement)
         project.messageBus.connect(this).subscribe(XDebuggerManager.TOPIC, RunXDebuggerModeAchievement)
-        project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, RunXTestsAchievement)
         project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, RunXTestSuitesAchievement)
         project.messageBus.connect(this).subscribe(SMTRunnerEventsListener.TEST_STATUS, RunXTestSuitesWithXTestsAchievement)
         project.messageBus.connect(this).subscribe(XBreakpointListener.TOPIC, SetXBreakpointsAchievement)

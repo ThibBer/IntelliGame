@@ -128,7 +128,6 @@ object ConsoleListener : ExecutionListener {
             val tests = regex.find(output)?.groupValues?.get(1)?.toInt()
 
             if (tests != null) {
-                RunXTestsAchievement.triggerAchievement(tests)
                 RunXTestSuitesAchievement.triggerAchievement()
                 RunXTestSuitesWithXTestsAchievement.triggerAchievement(tests)
             }

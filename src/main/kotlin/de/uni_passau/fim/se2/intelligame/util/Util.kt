@@ -46,7 +46,6 @@ object Util {
             RepairXWrongTestsAchievement,
             RunWithCoverageAchievement,
             RunXDebuggerModeAchievement,
-            RunXTestsAchievement,
             RunXTestSuitesAchievement,
             RunXTestSuitesWithXTestsAchievement,
             SetXBreakpointsAchievement,
@@ -99,7 +98,6 @@ object Util {
 
     fun getTestsAchievement(): List<Achievement> {
         return listOf(
-            RunXTestsAchievement,
             RunXTestSuitesAchievement,
             RunXTestSuitesWithXTestsAchievement,
             TriggerXAssertsByTestsAchievement,
