@@ -21,9 +21,7 @@ import java.sql.Timestamp
 import java.util.stream.Collectors
 
 object CSVReportGenerator {
-    private const val FILE_NAME = "AchievementsReport.csv"
-
-    fun generateCSVReport(project: Project?) {
+    fun generateCSVReport(project: Project?, name: String) {
         if (project == null) {
             return
         }
@@ -50,7 +48,7 @@ object CSVReportGenerator {
 
             csvFile.appendLine(row)
 
-            val path = Util.getEvaluationFilePath(project, FILE_NAME)
+            val path = Util.getEvaluationFilePath(project, name)
             csvFile.save(path)
         } catch (_: Exception) {
 
