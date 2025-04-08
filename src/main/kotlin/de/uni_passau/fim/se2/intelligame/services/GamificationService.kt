@@ -337,12 +337,16 @@ class GamificationService(val project: Project) : Disposable {
         properties.unsetValue("gamification-api-key")
 
         properties.unsetValue("gamification-user-id")
-        properties.setValue("gamification-user-id", UUID.randomUUID().toString())
+
+        userId = UUID.randomUUID().toString()
+        properties.setValue("gamification-user-id", userId)
 
         for(achievement in Util.getAchievements()){
             properties.unsetValue(achievement.getPropertyKey())
             properties.unsetValue(achievement.getLevelPropertyKey())
         }
+
+        disconnect()
     }
 
     fun sendExperimentData(files: List<File>, callback: ((Int?) -> Unit)? = null) {
