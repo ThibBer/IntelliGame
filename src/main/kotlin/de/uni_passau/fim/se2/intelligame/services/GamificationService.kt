@@ -349,11 +349,10 @@ class GamificationService(val project: Project) : Disposable {
         disconnect()
     }
 
-    fun sendExperimentData(files: List<File>, callback: ((Int?) -> Unit)? = null) {
-        if (files.isEmpty()) {
-            if(callback != null){
-                callback(null)
-            }
+    fun sendExperimentData(files: List<File>, canSendTestFiles: Boolean, callback: ((Int?) -> Unit)? = null) {
+        if (files.isEmpty() && callback != null) {
+            callback(null)
+            return
         }
 
         val client = httpClient.newBuilder().build()
@@ -363,6 +362,18 @@ class GamificationService(val project: Project) : Disposable {
         for (file in files) {
             bodyBuilder.addFormDataPart(
                 "file", file.name, file.asRequestBody("application/octet-stream".toMediaType())
+            )
+        }
+
+        val outputZipFile = System.getProperty("java.io.tmpdir") + File.separatorChar + "testClasses.zip"
+        if(canSendTestFiles){
+            val testsDirectory = project.basePath + "/src/test/java"
+
+            Util.zipFolder(testsDirectory, outputZipFile)
+
+            val file = File(outputZipFile)
+            bodyBuilder.addFormDataPart(
+                "tests", file.name, file.asRequestBody("application/zip".toMediaType())
             )
         }
 
@@ -381,6 +392,9 @@ class GamificationService(val project: Project) : Disposable {
         Logger.logStatus(stringBuilder.toString(), Logger.Kind.Debug, project)
 
         client.newCall(request).execute().use { response ->
+            val zipTestsFile = File(outputZipFile)
+            zipTestsFile.delete()
+
             if(response.code == 200) {
                 showNotification("File successfully sent, thanks for your help ! \uD83D\uDE09")
             }else{

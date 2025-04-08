@@ -6,6 +6,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.*
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBEmptyBorder
 import de.uni_passau.fim.se2.intelligame.services.GamificationService
@@ -50,6 +51,7 @@ class SettingsUI {
 
     companion object{
         private val files = ArrayList<File>()
+        private var canSendTestFiles = true
 
         fun create(project: Project): JComponent {
             val properties = PropertiesComponent.getInstance()
@@ -130,19 +132,26 @@ class SettingsUI {
 
             dumpDataPanel.add(tree, BorderLayout.NORTH)
 
+            val sendTestFiles = JBCheckBox("Send test files")
+            sendTestFiles.isSelected = canSendTestFiles
+            sendTestFiles.addChangeListener {
+                canSendTestFiles = sendTestFiles.isSelected
+            }
+            dumpDataPanel.add(sendTestFiles, BorderLayout.CENTER)
+
             val sendDataButton = JButton("Send experiment data")
             sendDataButton.setHorizontalTextPosition(SwingConstants.LEADING)
             sendDataButton.addActionListener {
                 sendDataButton.icon = AnimatedIcon.Default()
 
-                gamificationService.sendExperimentData(files) {
+                gamificationService.sendExperimentData(files, canSendTestFiles) {
                     sendDataButton.icon = null
                 }
             }
 
             sendDataButton.isEnabled = files.isNotEmpty()
 
-            dumpDataPanel.add(sendDataButton, BorderLayout.CENTER)
+            dumpDataPanel.add(sendDataButton, BorderLayout.SOUTH)
 
             checkboxTreeListener.nodeStateChanged = OnNodeStateChanged {
                 if(it.userObject is File) {

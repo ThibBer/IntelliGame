@@ -20,7 +20,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import de.uni_passau.fim.se2.intelligame.MyBundle
 import de.uni_passau.fim.se2.intelligame.achievements.*
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.random.Random
 
 val adjectives = listOf("Rapide", "Mystique", "Fou", "Brillant", "Sombre", "Éclair")
@@ -149,5 +154,37 @@ object Util {
                     it.replace("/", ".").replace("\\", ".")
                 )
             }
+    }
+
+    fun zipFolder(sourceDirPath: String, zipFilePath: String) {
+        val sourceDir = File(sourceDirPath)
+
+        ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFilePath))).use { zipOut ->
+            zipDirectoryRecursive(sourceDir, sourceDir.name, zipOut)
+        }
+    }
+
+    private fun zipDirectoryRecursive(fileToZip: File, fileName: String, zipOut: ZipOutputStream) {
+        if (fileToZip.isHidden) {
+            return
+        }
+
+        if (fileToZip.isDirectory) {
+            if (fileName.endsWith("/").not()) {
+                zipOut.putNextEntry(ZipEntry("$fileName/"))
+                zipOut.closeEntry()
+            }
+            fileToZip.listFiles()?.forEach { childFile ->
+                zipDirectoryRecursive(childFile, "$fileName/${childFile.name}", zipOut)
+            }
+
+            return
+        }
+
+        FileInputStream(fileToZip).use { fis ->
+            val zipEntry = ZipEntry(fileName)
+            zipOut.putNextEntry(zipEntry)
+            fis.copyTo(zipOut)
+        }
     }
 }
