@@ -110,6 +110,9 @@ class LeaderboardUI {
             usersTable.setCellSelectionEnabled(false)
 
             val sorter = TableRowSorter(model)
+            sorter.setComparator(0) { o1, o2 -> (o1 as Int).compareTo(o2 as Int) }
+            sorter.setComparator(2) { o1, o2 -> (o1 as Int).compareTo(o2 as Int) }
+
             usersTable.setRowSorter(sorter)
 
             usersTable.rowHeight = 30
