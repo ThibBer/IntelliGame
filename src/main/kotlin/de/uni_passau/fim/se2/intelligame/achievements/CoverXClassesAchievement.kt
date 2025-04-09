@@ -46,7 +46,7 @@ object CoverXClassesAchievement : Achievement() {
     }
 
     override fun getStepLevelMatrix(): LinkedHashMap<Int, Int> {
-        return linkedMapOf(0 to 10, 1 to 100, 2 to 1000, 3 to 10000)
+        return linkedMapOf(0 to 2, 1 to 25, 2 to 50, 3 to 100)
     }
 
     override fun supportsLanguages(): List<Language> {

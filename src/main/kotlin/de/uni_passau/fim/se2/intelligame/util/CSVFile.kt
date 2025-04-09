@@ -9,6 +9,10 @@ class CSVFile(private val headers: List<String>) {
         content.appendLine(data.joinToString(","))
     }
 
+    fun appendLine(data: String) {
+        content.appendLine(data)
+    }
+
     fun save(path: String) {
         val file = File(path)
 

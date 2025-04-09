@@ -29,6 +29,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.EditorNotifications
 import com.intellij.ui.content.ContentFactory
+import com.jetbrains.rd.util.getLogger
 import de.uni_passau.fim.se2.intelligame.MyBundle
 import de.uni_passau.fim.se2.intelligame.achievements.Achievement
 import de.uni_passau.fim.se2.intelligame.command.*
@@ -45,6 +46,7 @@ import java.io.File
 import java.sql.Timestamp
 import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.swing.SwingUtilities
 import kotlin.reflect.KClass
 
 @Service(Service.Level.PROJECT)
@@ -109,12 +111,12 @@ class GamificationService(val project: Project) : Disposable {
 
             Logger.logStatus("Websocket closing : $reason | code : $code", Logger.Kind.Debug, project)
 
-            if (code == 1008) {
+            if (code != 1008) {
+                setWebSocketState(WebSocketState.DISCONNECTING)
+            } else {
                 properties.unsetValue("gamification-api-key")
                 apiKey = ""
                 setWebSocketState(WebSocketState.INVALID_API_KEY)
-            } else {
-                setWebSocketState(WebSocketState.DISCONNECTING)
             }
         }
 
@@ -146,7 +148,7 @@ class GamificationService(val project: Project) : Disposable {
         val toolWindowManager = ToolWindowManager.getInstance(project)
         val toolWindow = toolWindowManager.getToolWindow("Gamification")!!
 
-        toolWindowManager.invokeLater {
+        SwingUtilities.invokeLater {
             toolWindow.contentManager.removeAllContents(true)
             val panel = WindowPanel(project).create()
             val content = ContentFactory.getInstance().createContent(panel, null, false)
@@ -175,8 +177,8 @@ class GamificationService(val project: Project) : Disposable {
 
         webSocketClient.send(
             gson.toJson(
-                AddPointsCommand(
-                    AddPointsCommandData(userId, pointsToAdd, className, gameMode.ordinal)
+                AddActivityCommand(
+                    AddActivityCommandData(userId, pointsToAdd, className, gameMode.ordinal)
                 )
             )
         )
@@ -257,7 +259,7 @@ class GamificationService(val project: Project) : Disposable {
 
         when (command.action) {
             "onInitUsers" -> onInitUsers(message)
-            "onUserPointsUpdated" -> onUserPointsUpdated(message)
+            "onUserActivityUpdated" -> onUserActivityUpdated(message)
             "onUserAdded" -> onUserAdded(message)
             "onUsernameUpdated" -> onUsernameUpdated(message)
         }
@@ -269,9 +271,9 @@ class GamificationService(val project: Project) : Disposable {
         refresh()
     }
 
-    private fun onUserPointsUpdated(message: String) {
-        val onUserPointsUpdatedCommand = gson.fromJson(message, OnUserPointsUpdatedCommand::class.java)
-        val data = onUserPointsUpdatedCommand.payload
+    private fun onUserActivityUpdated(message: String) {
+        val onUserActivityUpdatedCommand = gson.fromJson(message, OnUserActivityUpdatedCommand::class.java)
+        val data = onUserActivityUpdatedCommand.payload
         val user = data.user
 
         if (user.id == userId && gameMode == GameMode.LEADERBOARD) {
@@ -303,11 +305,10 @@ class GamificationService(val project: Project) : Disposable {
     }
 
     private fun showNotification(message: String) {
-        val notification =
-            NotificationGroupManager.getInstance().getNotificationGroup("Gamification").createNotification(
-                message,
-                NotificationType.INFORMATION
-            )
+        val notification = NotificationGroupManager.getInstance().getNotificationGroup("Gamification").createNotification(
+            message,
+            NotificationType.INFORMATION
+        )
 
         notification.notify(project)
 
@@ -405,6 +406,27 @@ class GamificationService(val project: Project) : Disposable {
                 callback(response.code)
             }
         }
+    }
+
+    fun updateCoverage(coverageInfo: CoverageInfo, testedClass: String, testName: String, project: Project?){
+        if(project == null){
+            thisLogger().error("Project is null, cannot update coverage")
+            return
+        }
+
+        val path = Util.getEvaluationFilePath(project, "Coverage.csv")
+
+        val csvFile = CSVFile(coverageInfo.getAsCsvHeader("testedClass,testName"))
+        csvFile.appendLine(coverageInfo.getAsCsvData() + ",$testedClass,$testName")
+        csvFile.save(path)
+
+        webSocketClient.send(
+            gson.toJson(
+                UpdateCoverageCommand(
+                    UpdateCoverageCommandData(userId, coverageInfo, testedClass, testName, gameMode.ordinal)
+                )
+            )
+        )
     }
 
     override fun dispose() = Unit

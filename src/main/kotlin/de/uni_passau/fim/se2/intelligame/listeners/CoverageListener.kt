@@ -16,6 +16,7 @@
 
 package de.uni_passau.fim.se2.intelligame.listeners
 
+import com.intellij.coverage.BaseCoverageSuite
 import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuite
 import com.intellij.coverage.CoverageSuiteListener
@@ -23,24 +24,27 @@ import com.intellij.coverage.CoverageSuitesBundle
 import de.uni_passau.fim.se2.intelligame.achievements.*
 import de.uni_passau.fim.se2.intelligame.util.CoverageInfo
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import de.uni_passau.fim.se2.intelligame.services.GamificationService
 import de.uni_passau.fim.se2.intelligame.util.Util
 import java.lang.reflect.Field
 object CoverageListener : CoverageSuiteListener {
     lateinit var project: Project
-
-    init {
-        println("Instantiate CoverageListener")
-        thisLogger().debug("Instantiate CoverageListener")
-    }
+    private lateinit var testRunName: String
 
     override fun coverageGathered(suite: CoverageSuite) {
         project = suite.project
-        RunWithCoverageAchievement.triggerAchievement(project)
+
+        testRunName = (suite as BaseCoverageSuite).configuration!!.name
+
+        if(!Util.isTestExcluded(testRunName.split(".").first())){
+            RunWithCoverageAchievement.triggerAchievement(project)
+        }
+
         super.coverageGathered(suite)
     }
 
@@ -68,7 +72,11 @@ object CoverageListener : CoverageSuiteListener {
                 classCoverageInfosField.isAccessible = true
                 val classCoverageInfosValue: Map<Any, Any> = classCoverageInfosField.get(annotator) as Map<Any, Any>
 
-                for ((key, value) in classCoverageInfosValue.filter { !Util.isTestExcluded(it.key as String) }) {
+                val gamificationService = project.service<GamificationService>()
+
+                val runClassName = testRunName.split(".").first().replace("Test", "")
+
+                for ((key, value) in classCoverageInfosValue.filter { (it.key as String).contains(runClassName) && !Util.isTestExcluded(it.key as String) }) {
                     val coverageInfo = extractCoverageInfos(value)
 
                     GetXLineCoverageInClassesWithYLinesAchievement.triggerAchievement(coverageInfo, key as String, project)
@@ -78,6 +86,8 @@ object CoverageListener : CoverageSuiteListener {
                     CoverXMethodsAchievement.triggerAchievement(coverageInfo, project)
                     CoverXClassesAchievement.triggerAchievement(coverageInfo, project)
                     CoverXBranchesAchievement.triggerAchievement(coverageInfo, project)
+
+                    gamificationService.updateCoverage(coverageInfo, key, testRunName, project)
                 }
 
                 val extensionCoverageField: Field = annotator.javaClass.getDeclaredField("myDirCoverageInfos")

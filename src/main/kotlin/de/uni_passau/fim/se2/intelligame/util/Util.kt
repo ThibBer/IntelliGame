@@ -50,14 +50,8 @@ object Util {
             RefactorXTestNamesAchievement,
             RepairXWrongTestsAchievement,
             RunWithCoverageAchievement,
-            RunXDebuggerModeAchievement,
             RunXTestSuitesAchievement,
             RunXTestSuitesWithXTestsAchievement,
-            SetXBreakpointsAchievement,
-            SetXConditionalBreakpointsAchievement,
-            SetXFieldWatchpointsAchievement,
-            SetXLineBreakpointsAchievement,
-            SetXMethodBreakpointsAchievement,
             TriggerXAssertsByTestsAchievement
         )
     }
@@ -90,17 +84,6 @@ object Util {
         )
     }
 
-    fun getDebuggingAchievements(): List<Achievement> {
-        return listOf(
-            RunXDebuggerModeAchievement,
-            SetXBreakpointsAchievement,
-            SetXConditionalBreakpointsAchievement,
-            SetXFieldWatchpointsAchievement,
-            SetXLineBreakpointsAchievement,
-            SetXMethodBreakpointsAchievement
-        )
-    }
-
     fun getTestsAchievement(): List<Achievement> {
         return listOf(
             RunXTestSuitesAchievement,
@@ -115,15 +98,18 @@ object Util {
     fun getProject(locationUrl: String?): Project? {
         val projects = ProjectManager.getInstance().openProjects
         var project: Project? = null
+
         if (projects.size == 1) {
             project = projects[0]
             return project
         }
+
         for (p in projects) {
             if (p.basePath?.let { locationUrl?.contains(it) } == true) {
                 project = p
             }
         }
+
         return project
     }
 
@@ -131,6 +117,7 @@ object Util {
         val adj = adjectives.random()
         val noun = nouns.random()
         val number = Random.nextInt(1000)
+
         return "$adj$noun$number"
     }
 
@@ -149,11 +136,8 @@ object Util {
 
         return MyBundle.getMessage("excludedTestClasses")
             .split(",")
-            .any {
-                testName.contains(
-                    it.replace("/", ".").replace("\\", ".")
-                )
-            }
+            .map{ it.trim().replace("/", ".").replace("\\", ".") }
+            .any { testName.contains(it, true) }
     }
 
     fun zipFolder(sourceDirPath: String, zipFilePath: String) {

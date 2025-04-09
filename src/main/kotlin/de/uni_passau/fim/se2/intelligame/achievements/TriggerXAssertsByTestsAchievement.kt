@@ -111,7 +111,7 @@ object TriggerXAssertsByTestsAchievement : SMTRunnerEventsListener, Achievement(
     }
 
     override fun getStepLevelMatrix(): LinkedHashMap<Int, Int> {
-        return linkedMapOf(0 to 3, 1 to 100, 2 to 1000, 3 to 10000)
+        return linkedMapOf(0 to 3, 1 to 10, 2 to 100, 3 to 1000)
     }
 
     override fun supportsLanguages(): List<Language> {

@@ -21,7 +21,6 @@ class AchievementsUI {
             AchievementCategory(AchievementCategoryType.TESTING, Util.getTestsAchievement()),
             AchievementCategory(AchievementCategoryType.COVERAGE, Util.getCoverageAchievements()),
             AchievementCategory(AchievementCategoryType.COVERAGE_ADVANCED, Util.getAdvancedCoverageAchievements()),
-            AchievementCategory(AchievementCategoryType.DEBUGGING, Util.getDebuggingAchievements()),
             AchievementCategory(AchievementCategoryType.TEST_REFACTORING, Util.getRefactoringAchievements()),
         )
 
