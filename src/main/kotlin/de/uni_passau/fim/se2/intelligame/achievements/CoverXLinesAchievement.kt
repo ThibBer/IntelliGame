@@ -19,6 +19,7 @@ package de.uni_passau.fim.se2.intelligame.achievements
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
 import de.uni_passau.fim.se2.intelligame.util.CoverageInfo
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 
 object CoverXLinesAchievement : Achievement() {
     fun triggerAchievement(coverageInfo: CoverageInfo, project: Project?) {
@@ -49,7 +50,7 @@ object CoverXLinesAchievement : Achievement() {
         return linkedMapOf(0 to 100, 1 to 300, 2 to 500, 3 to 700)
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java, Language.JavaScript)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS, GameMode.LEADERBOARD)
     }
 }

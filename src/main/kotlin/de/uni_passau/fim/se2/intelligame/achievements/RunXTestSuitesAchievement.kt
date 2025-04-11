@@ -20,6 +20,7 @@ import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 import de.uni_passau.fim.se2.intelligame.util.Util
 
 object RunXTestSuitesAchievement : SMTRunnerEventsListener, Achievement() {
@@ -105,7 +106,7 @@ object RunXTestSuitesAchievement : SMTRunnerEventsListener, Achievement() {
         return linkedMapOf(0 to 3, 1 to 15, 2 to 30, 3 to 100)
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java, Language.JavaScript)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS, GameMode.LEADERBOARD)
     }
 }

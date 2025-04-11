@@ -29,7 +29,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.EditorNotifications
 import com.intellij.ui.content.ContentFactory
-import com.jetbrains.rd.util.getLogger
 import de.uni_passau.fim.se2.intelligame.MyBundle
 import de.uni_passau.fim.se2.intelligame.achievements.Achievement
 import de.uni_passau.fim.se2.intelligame.command.*
@@ -146,7 +145,11 @@ class GamificationService(val project: Project) : Disposable {
         }
 
         val toolWindowManager = ToolWindowManager.getInstance(project)
-        val toolWindow = toolWindowManager.getToolWindow("Gamification")!!
+        val toolWindow = toolWindowManager.getToolWindow("Gamification")
+        if(toolWindow == null){
+            thisLogger().error("Tool window is null, cannot refresh the window")
+            return
+        }
 
         SwingUtilities.invokeLater {
             toolWindow.contentManager.removeAllContents(true)

@@ -34,10 +34,6 @@ import java.util.concurrent.TimeUnit
 import javax.swing.SwingUtilities
 
 abstract class Achievement {
-    enum class Language {
-        Java, JavaScript
-    }
-
     protected fun refreshWindow(){
         val project = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)
         val toolWindow = ToolWindowManager.getInstance(project!!).getToolWindow("Gamification")!!
@@ -150,11 +146,16 @@ abstract class Achievement {
         }
 
         val gamificationService = project.service<GamificationService>()
+        val gameMode = gamificationService.getGameMode()
+
+        if(!supportsGameMode(gameMode)){
+            return
+        }
 
         val pointsToAdd = progress - progress()
         gamificationService.addPoints(pointsToAdd, this::class)
 
-        if(gamificationService.getGameMode() == GameMode.ACHIEVEMENTS){
+        if(gameMode == GameMode.ACHIEVEMENTS){
             if (progress >= nextStep()) {
                 updateProgress(progress)
                 showAchievementNotification(
@@ -178,14 +179,13 @@ abstract class Achievement {
             refreshWindow()
             CSVReportGenerator.generateCSVReport(project, "AchievementsReport.csv")
         }
-
     }
 
-    open fun isActive(): Boolean {
-        return true
-    }
+    abstract fun supportedGameModes(): List<GameMode>
 
-    abstract fun supportsLanguages(): List<Language>
+    fun supportsGameMode(gameMode: GameMode): Boolean {
+        return supportedGameModes().contains(gameMode)
+    }
 
     open fun getPropertyKey(): String{
         return this::class.simpleName!!

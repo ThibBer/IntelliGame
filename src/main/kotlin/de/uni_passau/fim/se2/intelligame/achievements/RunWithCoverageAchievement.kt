@@ -18,6 +18,7 @@ package de.uni_passau.fim.se2.intelligame.achievements
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 
 object RunWithCoverageAchievement : Achievement() {
     fun triggerAchievement(project: Project?) {
@@ -48,7 +49,7 @@ object RunWithCoverageAchievement : Achievement() {
         return linkedMapOf(0 to 3, 1 to 10, 2 to 20, 3 to 50)
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java, Language.JavaScript)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS, GameMode.LEADERBOARD)
     }
 }

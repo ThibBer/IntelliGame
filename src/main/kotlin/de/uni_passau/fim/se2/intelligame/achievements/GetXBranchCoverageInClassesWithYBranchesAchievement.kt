@@ -19,6 +19,7 @@ package de.uni_passau.fim.se2.intelligame.achievements
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
 import de.uni_passau.fim.se2.intelligame.util.CoverageInfo
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 
 object GetXBranchCoverageInClassesWithYBranchesAchievement : Achievement() {
     fun triggerAchievement(coverageInfo: CoverageInfo, className: String, project: Project?) {
@@ -132,7 +133,7 @@ object GetXBranchCoverageInClassesWithYBranchesAchievement : Achievement() {
         return 500
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java, Language.JavaScript)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS)
     }
 }

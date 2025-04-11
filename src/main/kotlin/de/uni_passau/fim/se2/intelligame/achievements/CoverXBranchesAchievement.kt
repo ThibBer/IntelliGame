@@ -19,6 +19,7 @@ package de.uni_passau.fim.se2.intelligame.achievements
 import de.uni_passau.fim.se2.intelligame.util.CoverageInfo
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 
 object CoverXBranchesAchievement : Achievement() {
     fun triggerAchievement(coverageInfo: CoverageInfo, project: Project?) {
@@ -50,7 +51,7 @@ object CoverXBranchesAchievement : Achievement() {
         return linkedMapOf(0 to 2, 1 to 25, 2 to 50, 3 to 100)
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java, Language.JavaScript)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS, GameMode.LEADERBOARD)
     }
 }

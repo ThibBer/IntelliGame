@@ -20,6 +20,7 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.ProjectLocator
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 import de.uni_passau.fim.se2.intelligame.util.Util
 import java.io.File
 
@@ -50,8 +51,8 @@ object AddTestsAchievement : Achievement(), BulkFileListener {
         return linkedMapOf(0 to 10, 1 to 100, 2 to 1000, 3 to 10000)
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java, Language.JavaScript)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS, GameMode.LEADERBOARD)
     }
 
     override fun before(events: MutableList<out VFileEvent>) {
@@ -98,9 +99,5 @@ object AddTestsAchievement : Achievement(), BulkFileListener {
 
     private fun countTests(string: String): Int {
         return (string.split("@Test").dropLastWhile { it.isEmpty() }.toTypedArray().size - 1).coerceAtLeast(0)
-    }
-
-    private fun countJestTests(string: String): Int {
-        return "\\s(?:test|it)\\(".toRegex().findAll(string).count()
     }
 }

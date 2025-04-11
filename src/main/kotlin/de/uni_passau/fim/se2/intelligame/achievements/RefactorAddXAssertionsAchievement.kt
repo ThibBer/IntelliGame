@@ -20,6 +20,7 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.ProjectLocator
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 import de.uni_passau.fim.se2.intelligame.util.Util
 import java.io.File
 
@@ -71,10 +72,6 @@ object RefactorAddXAssertionsAchievement : BulkFileListener, Achievement() {
         return (string.split("assert").dropLastWhile { it.isEmpty() }.toTypedArray().size - 1).coerceAtLeast(0)
     }
 
-    private fun countJestAsserts(string: String): Int {
-        return "\\sexpect\\(".toRegex().findAll(string).count()
-    }
-
     override fun progress(): Int {
         val properties = PropertiesComponent.getInstance()
         return properties.getInt(getPropertyKey(), 0)
@@ -97,7 +94,7 @@ object RefactorAddXAssertionsAchievement : BulkFileListener, Achievement() {
         return linkedMapOf(0 to 3, 1 to 10, 2 to 100, 3 to 1000)
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java, Language.JavaScript)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS, GameMode.LEADERBOARD)
     }
 }
