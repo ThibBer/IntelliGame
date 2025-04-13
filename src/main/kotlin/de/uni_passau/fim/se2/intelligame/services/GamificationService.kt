@@ -349,8 +349,6 @@ class GamificationService(val project: Project) : Disposable {
             properties.unsetValue(achievement.getPropertyKey())
             properties.unsetValue(achievement.getLevelPropertyKey())
         }
-
-        disconnect()
     }
 
     fun sendExperimentData(files: List<File>, canSendTestFiles: Boolean, callback: ((Int?) -> Unit)? = null) {
