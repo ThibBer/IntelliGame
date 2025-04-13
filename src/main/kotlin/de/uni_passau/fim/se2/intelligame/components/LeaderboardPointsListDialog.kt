@@ -3,7 +3,6 @@
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.ui.util.minimumHeight
 import com.intellij.util.ui.JBUI
 import de.uni_passau.fim.se2.intelligame.util.GameMode
 import de.uni_passau.fim.se2.intelligame.util.Util
@@ -59,17 +58,16 @@ class TablePopupDialog(project: Project?) : DialogWrapper(project) {
             ): Component {
                 text = value.toString()
                 font = table.font
-                minimumHeight = table.rowHeight
 
                 if(jTable != null){
-                    setSize(jTable.columnModel.getColumn(column).width, getPreferredSize().height);
+                    setSize(jTable.columnModel.getColumn(column).width, getPreferredSize().height)
 
                     if (jTable.getRowHeight(row) != getPreferredSize().height) {
-                        jTable.setRowHeight(row, getPreferredSize().height);
+                        jTable.setRowHeight(row, getPreferredSize().height)
                     }
                 }
 
-                return this;
+                return this
             }
 
             override fun firePropertyChange(propertyName: String, oldValue: Boolean, newValue: Boolean) {
