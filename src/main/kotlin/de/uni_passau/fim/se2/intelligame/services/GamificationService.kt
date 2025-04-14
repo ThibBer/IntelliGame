@@ -140,14 +140,14 @@ class GamificationService(val project: Project) : Disposable {
     private fun refresh(){
         val project = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(10, TimeUnit.SECONDS)!!.getData(PlatformDataKeys.PROJECT)
         if(project == null){
-            thisLogger().error("Project is null, cannot refresh the window")
+            thisLogger().debug("Project is null, cannot refresh the window")
             return
         }
 
         val toolWindowManager = ToolWindowManager.getInstance(project)
         val toolWindow = toolWindowManager.getToolWindow("Gamification")
         if(toolWindow == null){
-            thisLogger().error("Tool window is null, cannot refresh the window")
+            thisLogger().debug("Tool window is null, cannot refresh the window")
             return
         }
 
@@ -411,7 +411,7 @@ class GamificationService(val project: Project) : Disposable {
 
     fun updateCoverage(coverageInfo: CoverageInfo, testedClass: String, testName: String, project: Project?){
         if(project == null){
-            thisLogger().error("Project is null, cannot update coverage")
+            thisLogger().debug("Project is null, cannot update coverage")
             return
         }
 
