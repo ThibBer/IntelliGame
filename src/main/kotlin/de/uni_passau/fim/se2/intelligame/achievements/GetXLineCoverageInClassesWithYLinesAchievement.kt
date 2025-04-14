@@ -125,10 +125,10 @@ object GetXLineCoverageInClassesWithYLinesAchievement : Achievement() {
         }
 
         if (level <= 3) {
-            return 250
+            return 100
         }
 
-        return 500
+        return 300
     }
 
     override fun supportsLanguages(): List<Language> {

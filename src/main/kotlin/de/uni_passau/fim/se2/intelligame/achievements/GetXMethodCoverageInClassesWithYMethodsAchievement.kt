@@ -93,35 +93,43 @@ object GetXMethodCoverageInClassesWithYMethodsAchievement : Achievement() {
     }
 
     override fun getStepLevelMatrix(): LinkedHashMap<Int, Int> {
-        return linkedMapOf(0 to 10, 1 to 50, 2 to 250, 3 to 500)
+        return linkedMapOf(0 to 5, 1 to 10, 2 to 50, 3 to 200)
     }
 
     private fun requiredCoverage(): Double {
         val level = getLevel()
-        if (level > 1) {
-            if (level > 2) {
-                if (level > 3) {
-                    return 0.90
-                }
-                return 0.85
-            }
-            return 0.80
+
+        if(level <= 1){
+            return 0.6
         }
-        return 0.6
+
+        if(level <= 2){
+            return 0.8
+        }
+
+        if(level <= 3){
+            return 0.5
+        }
+
+        return 0.9
     }
 
     private fun requiredTotalMethods(): Int {
         val level = getLevel()
-        if (level > 1) {
-            if (level > 2) {
-                if (level > 3) {
-                    return 25
-                }
-                return 15
-            }
+
+        if(level <= 1){
+            return 3
+        }
+
+        if(level <= 2){
             return 8
         }
-        return 3
+
+        if(level <= 3){
+            return 15
+        }
+
+        return 25
     }
 
     override fun supportsLanguages(): List<Language> {

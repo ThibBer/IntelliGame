@@ -95,7 +95,7 @@ object GetXBranchCoverageInClassesWithYBranchesAchievement : Achievement() {
     }
 
     override fun getStepLevelMatrix(): LinkedHashMap<Int, Int> {
-        return linkedMapOf(0 to 5, 1 to 20, 2 to 75, 3 to 250)
+        return linkedMapOf(0 to 2, 1 to 5, 2 to 10, 3 to 30)
     }
 
     private fun requiredCoverage(): Double {
@@ -118,18 +118,18 @@ object GetXBranchCoverageInClassesWithYBranchesAchievement : Achievement() {
     private fun requiredTotalBranches(): Int {
         val level = getLevel()
         if (level <= 1) {
-            return 15
+            return 5
         }
 
         if (level <= 2) {
-            return 50
+            return 10
         }
 
         if (level <= 3) {
-            return 250
+            return 15
         }
 
-        return 500
+        return 20
     }
 
     override fun supportsLanguages(): List<Language> {
