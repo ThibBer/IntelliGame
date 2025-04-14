@@ -4,6 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
+import com.intellij.util.ui.JBUI
 import de.uni_passau.fim.se2.intelligame.services.GamificationService
 import de.uni_passau.fim.se2.intelligame.util.WebSocketState
 import java.awt.GridBagConstraints
@@ -29,6 +30,7 @@ class WebsocketUI {
                 stateLabel.foreground = JBColor.RED
             }
 
+            gbc.insets = JBUI.insets(0, 0, 0, 5)
             panel.add(stateLabel, gbc)
 
             val connectionButton = JButton(if(isWebSocketConnected) "Disconnect" else "Connect")
@@ -40,6 +42,7 @@ class WebsocketUI {
                 }
             }
 
+            gbc.insets = JBUI.insets(0, 0, 0, 0)
             panel.add(connectionButton, gbc)
 
             return panel
