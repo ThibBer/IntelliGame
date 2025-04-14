@@ -22,6 +22,7 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.readText
 import com.intellij.psi.search.GlobalSearchScope
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 import de.uni_passau.fim.se2.intelligame.util.Util
 import javax.swing.SwingUtilities
 
@@ -134,7 +135,7 @@ object FindXBugsAchievement : SMTRunnerEventsListener, Achievement() {
         return 1000
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java, Language.JavaScript)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS, GameMode.LEADERBOARD)
     }
 }

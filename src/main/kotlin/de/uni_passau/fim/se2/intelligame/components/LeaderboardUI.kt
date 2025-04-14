@@ -13,7 +13,6 @@ import de.uni_passau.fim.se2.intelligame.util.WebSocketState
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Font
-import java.util.*
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
@@ -187,8 +186,26 @@ class LeaderboardUI {
                 }
             })
 
+            val bottomPanel = JPanel()
+            bottomPanel.border = JBEmptyBorder(0)
+            bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.PAGE_AXIS)
+
+            val howToWinPointsButton = JButton("How To Win Points ?")
+            howToWinPointsButton.addActionListener {
+                val dialog = TablePopupDialog(project)
+                dialog.show()
+            }
+
+            howToWinPointsButton.alignmentX = Component.CENTER_ALIGNMENT
+            bottomPanel.add(howToWinPointsButton)
+
+            bottomPanel.add(Box.createVerticalStrut(10))
+
             val websocketPanel = WebsocketUI.create(project)
-            panel.add(websocketPanel, BorderLayout.SOUTH)
+            websocketPanel.alignmentX = Component.CENTER_ALIGNMENT
+            bottomPanel.add(websocketPanel)
+
+            panel.add(bottomPanel, BorderLayout.SOUTH)
 
             return panel
         }

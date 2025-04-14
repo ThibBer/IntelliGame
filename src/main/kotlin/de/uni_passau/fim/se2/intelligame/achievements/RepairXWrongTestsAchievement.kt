@@ -20,6 +20,7 @@ import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.project.Project
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 import de.uni_passau.fim.se2.intelligame.util.Util
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -127,7 +128,7 @@ object RepairXWrongTestsAchievement : SMTRunnerEventsListener, Achievement() {
         return linkedMapOf(0 to 3, 1 to 10, 2 to 100, 3 to 1000)
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS, GameMode.LEADERBOARD)
     }
 }

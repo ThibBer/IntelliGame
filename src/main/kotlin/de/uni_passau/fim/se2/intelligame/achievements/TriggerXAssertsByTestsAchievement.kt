@@ -23,8 +23,8 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.FileIndexFacade
-import com.intellij.openapi.vfs.readText
 import com.intellij.psi.search.ProjectScopeImpl
+import de.uni_passau.fim.se2.intelligame.util.GameMode
 import de.uni_passau.fim.se2.intelligame.util.Util
 import java.util.concurrent.TimeUnit
 import javax.swing.SwingUtilities
@@ -114,7 +114,7 @@ object TriggerXAssertsByTestsAchievement : SMTRunnerEventsListener, Achievement(
         return linkedMapOf(0 to 3, 1 to 10, 2 to 100, 3 to 1000)
     }
 
-    override fun supportsLanguages(): List<Language> {
-        return listOf(Language.Java, Language.JavaScript)
+    override fun supportedGameModes(): List<GameMode> {
+        return listOf(GameMode.ACHIEVEMENTS, GameMode.LEADERBOARD)
     }
 }
