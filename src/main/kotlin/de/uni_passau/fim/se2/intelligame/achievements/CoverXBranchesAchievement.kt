@@ -23,6 +23,10 @@ import de.uni_passau.fim.se2.intelligame.util.GameMode
 
 object CoverXBranchesAchievement : Achievement() {
     fun triggerAchievement(coverageInfo: CoverageInfo, project: Project?) {
+        if(coverageInfo.coveredBranchCount <= 0){
+            return
+        }
+
         var progress = progress()
         progress += coverageInfo.coveredBranchCount
         handleProgress(progress, project)

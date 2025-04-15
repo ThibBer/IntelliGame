@@ -23,6 +23,10 @@ import de.uni_passau.fim.se2.intelligame.util.GameMode
 
 object CoverXLinesAchievement : Achievement() {
     fun triggerAchievement(coverageInfo: CoverageInfo, project: Project?) {
+        if(coverageInfo.coveredLineCount <= 0){
+            return
+        }
+
         var progress = progress()
         progress += coverageInfo.coveredLineCount
         handleProgress(progress, project)

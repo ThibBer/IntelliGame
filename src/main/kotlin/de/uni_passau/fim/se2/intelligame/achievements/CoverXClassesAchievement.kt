@@ -23,6 +23,10 @@ import de.uni_passau.fim.se2.intelligame.util.GameMode
 
 object CoverXClassesAchievement : Achievement() {
     fun triggerAchievement(coverageInfo: CoverageInfo, project: Project?) {
+        if(coverageInfo.coveredClassCount <= 0){
+            return
+        }
+
         var progress = progress()
         progress += coverageInfo.coveredClassCount
         handleProgress(progress, project)
