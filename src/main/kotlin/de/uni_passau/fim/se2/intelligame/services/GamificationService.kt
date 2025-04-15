@@ -351,7 +351,7 @@ class GamificationService(val project: Project) : Disposable {
         }
     }
 
-    fun sendExperimentData(files: List<File>, canSendTestFiles: Boolean, callback: ((Int?) -> Unit)? = null) {
+    fun sendExperimentData(files: List<File>, canSendTestFiles: Boolean, canSendSourceFiles: Boolean, callback: ((Int?) -> Unit)? = null) {
         if (files.isEmpty() && callback != null) {
             callback(null)
             return
@@ -367,15 +367,27 @@ class GamificationService(val project: Project) : Disposable {
             )
         }
 
-        val outputZipFile = System.getProperty("java.io.tmpdir") + File.separatorChar + "testClasses.zip"
+        val outputTestZipFile = System.getProperty("java.io.tmpdir") + File.separatorChar + "testClasses.zip"
         if(canSendTestFiles){
             val testsDirectory = project.basePath + "/src/test/java"
 
-            Util.zipFolder(testsDirectory, outputZipFile)
+            Util.zipFolder(testsDirectory, outputTestZipFile)
 
-            val file = File(outputZipFile)
+            val file = File(outputTestZipFile)
             bodyBuilder.addFormDataPart(
                 "tests", file.name, file.asRequestBody("application/zip".toMediaType())
+            )
+        }
+
+        val outputSourceZipFile = System.getProperty("java.io.tmpdir") + File.separatorChar + "sourceClasses.zip"
+        if(canSendSourceFiles){
+            val testsDirectory = project.basePath + "/src/main/java"
+
+            Util.zipFolder(testsDirectory, outputSourceZipFile)
+
+            val file = File(outputSourceZipFile)
+            bodyBuilder.addFormDataPart(
+                "sources", file.name, file.asRequestBody("application/zip".toMediaType())
             )
         }
 
@@ -394,8 +406,11 @@ class GamificationService(val project: Project) : Disposable {
         Logger.logStatus(stringBuilder.toString(), Logger.Kind.Debug, project)
 
         client.newCall(request).execute().use { response ->
-            val zipTestsFile = File(outputZipFile)
+            val zipTestsFile = File(outputTestZipFile)
             zipTestsFile.delete()
+
+            val zipSourceFile = File(outputSourceZipFile)
+            zipSourceFile.delete()
 
             if(response.code == 200) {
                 showNotification("File successfully sent, thanks for your help ! \uD83D\uDE09")

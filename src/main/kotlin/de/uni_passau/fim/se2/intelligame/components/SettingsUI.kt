@@ -52,6 +52,7 @@ class SettingsUI {
     companion object{
         private val files = ArrayList<File>()
         private var canSendTestFiles = true
+        private var canSendSourceFiles = true
 
         fun create(project: Project): JComponent {
             val properties = PropertiesComponent.getInstance()
@@ -128,23 +129,38 @@ class SettingsUI {
                     }
                 }
             }
+
             tree.addMouseListener(mouseAdapter)
 
             dumpDataPanel.add(tree, BorderLayout.NORTH)
+
+            val sendFilesPanel = JPanel()
+            sendFilesPanel.layout = BoxLayout(sendFilesPanel, BoxLayout.PAGE_AXIS)
+
+            val sendSourceFiles = JBCheckBox("Send source files")
+            sendSourceFiles.isSelected = canSendSourceFiles
+            sendSourceFiles.addChangeListener {
+                canSendSourceFiles = sendSourceFiles.isSelected
+            }
+
+            sendFilesPanel.add(sendSourceFiles)
 
             val sendTestFiles = JBCheckBox("Send test files")
             sendTestFiles.isSelected = canSendTestFiles
             sendTestFiles.addChangeListener {
                 canSendTestFiles = sendTestFiles.isSelected
             }
-            dumpDataPanel.add(sendTestFiles, BorderLayout.CENTER)
+
+            sendFilesPanel.add(sendTestFiles)
+
+            dumpDataPanel.add(sendFilesPanel, BorderLayout.CENTER)
 
             val sendDataButton = JButton("Send experiment data")
             sendDataButton.setHorizontalTextPosition(SwingConstants.LEADING)
             sendDataButton.addActionListener {
                 sendDataButton.icon = AnimatedIcon.Default()
 
-                gamificationService.sendExperimentData(files, canSendTestFiles) {
+                gamificationService.sendExperimentData(files, canSendTestFiles, canSendSourceFiles) {
                     sendDataButton.icon = null
                 }
             }
