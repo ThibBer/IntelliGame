@@ -1,13 +1,14 @@
 # IntelliGame
 IntelliGame Plugin for IntelliJ to integrate Gamification with achievements and leaderboard into IntelliJ.
 
+This plugin is NOT PUBLISHED to [Jetbrains Marketplace](https://plugins.jetbrains.com), but you can install it manually.
 
 ## Installation
 ### Requirements
 - [IntelliJ IDEA 2024.3 or later](https://www.jetbrains.com/idea/download)
 ### How to
 - Download the [last version of the plugin](https://github.com/ThibBer/IntelliGame/tags)
-- Open IntelliJ -> File -> Settings -> Plugins
+- Open IntelliJ and open ``File -> Settings -> Plugins``
 - Click on the gear icon 
 ![cog-wheel.jpg](docs/cog-wheel.jpg)
 - Click on "Install Plugin From Disk"
@@ -16,9 +17,9 @@ IntelliGame Plugin for IntelliJ to integrate Gamification with achievements and 
 - Restart IDE
 
 ## Usage
-If you don't have a trophy ![trophy-tool-window.svg](src/main/resources/icons/trophy-tool-window.svg) on the left side of your IDE, you can open plugin window from ``View`` -> ``Tool windows`` -> ``Gamification``
+If you don't have a trophy ![trophy-tool-window.svg](src/main/resources/icons/trophy-tool-window.svg) on the left side of your IDE, you can open plugin window from ``View -> Tool windows -> Gamification``
 
-Now, you must have the trophy on the left menu of your IDE
+Now, you must have the trophy ![trophy-tool-window.svg](src/main/resources/icons/trophy-tool-window.svg) on the left menu of your IDE
 
 You can move it everywhere you want in the IDE.
 
@@ -36,7 +37,6 @@ During development, the [IntelliJ Platform SDK](https://plugins.jetbrains.com/do
   - In order to display the new Achievements in the Achievement Overview, they must be added to the appropriate Get method in the [Util](src/main/kotlin/de/uni_passau/fim/se2/intelligame/services/Util.kt) class. The Achievements are then automatically listed in the overview.
   - If a new Achievement group should be added, it has to be created in the [MoreInformationDialog](src/main/kotlin/de/uni_passau/fim/se2/intelligame/components/MoreInformationDialog.kt) synchronously to the existing groups and a new get method with the associated Achievements has to be defined in the [Util](src/main/kotlin/de/uni_passau/fim/se2/intelligame/services/Util.kt) class.
 - To test the implementations, IntelliJ can be started using the intelliJ/runIde Gradle task in a sandbox that has the plugin installed.
-
 
 
 ---
